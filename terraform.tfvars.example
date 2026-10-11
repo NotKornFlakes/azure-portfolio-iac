@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is git-ignored so your subscription ID stays off GitHub.
+
+subscription_id = "00000000-0000-0000-0000-000000000000"
+project_name    = "portfolio"
+environment     = "dev"
+location        = "eastus"
