@@ -1,6 +1,6 @@
 # Azure Portfolio Site — Infrastructure as Code
 
-![Terraform CI](https://github.com/YOUR_GITHUB_USERNAME/azure-portfolio-iac/actions/workflows/terraform-ci.yml/badge.svg)
+![Terraform CI](https://github.com/NotKornFlakes/azure-portfolio-iac/actions/workflows/terraform-ci.yml/badge.svg)
 
 A static portfolio website hosted on **Azure Storage**, provisioned entirely with **Terraform** and validated by **GitHub Actions** on every push.
 
