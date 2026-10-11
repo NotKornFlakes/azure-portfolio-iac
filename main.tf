@@ -18,6 +18,13 @@ resource "azurerm_resource_group" "main" {
 }
 
 resource "azurerm_storage_account" "site" {
+  # Security scan exceptions, each one a deliberate trade-off for a public static website:
+  #checkov:skip=CKV_AZURE_59:Static website hosting requires public network access
+  #checkov:skip=CKV2_AZURE_33:Private endpoints would block public visitors to the site
+  #checkov:skip=CKV_AZURE_206:LRS is enough for a dev site whose source of truth is this repo
+  #checkov:skip=CKV2_AZURE_1:No sensitive data; Microsoft-managed encryption keys are sufficient
+  #checkov:skip=CKV_AZURE_33:Queue service is not used by this project
+  #checkov:skip=CKV2_AZURE_40:Shared Key is used by Terraform to upload blobs; switching to Entra ID auth is on the roadmap
   name                     = local.storage_account_name
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
@@ -28,6 +35,24 @@ resource "azurerm_storage_account" "site" {
   min_tls_version                 = "TLS1_2"
   https_traffic_only_enabled      = true
   allow_nested_items_to_be_public = false
+  local_user_enabled              = false
+  shared_access_key_enabled       = true
+
+  # Recover accidentally deleted or overwritten files for 7 days
+  blob_properties {
+    delete_retention_policy {
+      days = 7
+    }
+    container_delete_retention_policy {
+      days = 7
+    }
+  }
+
+  # Any SAS token issued for this account expires after 1 day
+  sas_policy {
+    expiration_period = "01.00:00:00"
+    expiration_action = "Log"
+  }
 
   tags = var.tags
 }
@@ -43,12 +68,11 @@ resource "azurerm_storage_account_static_website" "site" {
 resource "azurerm_storage_blob" "site_files" {
   for_each = fileset(local.site_dir, "**")
 
-  name                   = each.value
-  storage_account_name   = azurerm_storage_account.site.name
-  storage_container_name = "$web"
-  type                   = "Block"
-  source                 = "${local.site_dir}/${each.value}"
-  content_md5            = filemd5("${local.site_dir}/${each.value}")
+  name                 = each.value
+  storage_container_id = "${azurerm_storage_account.site.id}/blobServices/default/containers/$web"
+  type                 = "Block"
+  source               = "${local.site_dir}/${each.value}"
+  content_md5          = filemd5("${local.site_dir}/${each.value}")
   content_type = lookup(
     {
       html = "text/html"
