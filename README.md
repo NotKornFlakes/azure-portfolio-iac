@@ -79,7 +79,10 @@ terraform destroy
 
 ## What I learned
 
-- _Fill this in — reviewers love this section._
+- **AI speeds up the build, but I own the review.** With clear prompts and structure, AI drafted most of the Terraform and caught security issues. My job was quality control: reading every `terraform plan` before applying, checking what would change, and catching anything wrong before it reached production.
+- **Secrets never go in Git.** Connecting Azure and Cloudflare needs a subscription ID and an API token, and neither belongs in a public repo. I keep them in a git-ignored `terraform.tfvars`, commit only a `terraform.tfvars.example` with placeholders, and checked the full Git history to confirm nothing leaked. The Cloudflare token is scoped to one zone with only the permissions Terraform needs.
+- **Pushing isn't deploying.** `git add`, `commit` and `push` update the repo, and GitHub Actions checks the code. The live site only changes when I run `terraform apply`, which is needed for changes to `site/` or the `.tf` files but not for README or workflow edits. Automating that step with OIDC is next on the roadmap.
+- **Cheap to build, but costs add up.** The Azure side costs very little, but the domain renews at about $45/year after a ~$10 first year. I set an Azure budget alert so I'm notified before spending gets close to my monthly limit.
 
 ## Roadmap
 
