@@ -44,7 +44,7 @@ A static portfolio website hosted on **Azure Storage** behind **Cloudflare**, pr
 |---|---|---|
 | `terraform-ci.yml` | Every push and PR | `fmt`, `validate`, Checkov scan; fails on any unaddressed finding |
 | `terraform-deploy.yml` | Pull request | `terraform plan`, a preview of what would change |
-| `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment, deploying the live site |
+| `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment, then purges the Cloudflare cache so visitors get the new files immediately |
 
 **How GitHub signs in to Azure:** GitHub issues a short-lived OIDC token for each run, and Entra ID exchanges it for an Azure token. The Entra ID app only trusts two subjects: pull requests and the `production` environment of this repo, identified by GitHub's immutable owner and repo IDs, so a renamed or recreated repo can't impersonate it. There is no client secret to leak or rotate.
 
@@ -60,7 +60,7 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 - **Azure:** TLS 1.2 minimum, HTTPS only, no anonymous blob access, local users disabled, 7-day soft delete for blobs and containers, 1-day SAS token expiry policy.
 - **No storage account keys:** Shared Key access is disabled on both storage accounts. Terraform uploads site files with Entra ID (`storage_use_azuread = true`) using the **Storage Blob Data Contributor** role, so there's no account key that could leak or need rotating.
 - **Cloudflare:** Full (strict) SSL, so Cloudflare validates Azure's certificate; automatic HTTP → HTTPS redirects; TLS 1.2 minimum.
-- **Least-privilege credentials:** the Cloudflare API token is scoped to one zone with only DNS, Zone Settings and Cloud Connector edit rights. The GitHub Actions token is read-only (`permissions: contents: read`).
+- **Least-privilege credentials:** the Cloudflare API token is scoped to one zone with only DNS, Zone Settings, Cloud Connector and Cache Purge rights. The GitHub Actions token is read-only (`permissions: contents: read`).
 - **No secrets in Git:** locally, the subscription ID and API token live only in the git-ignored `terraform.tfvars`; in CI they're GitHub Actions secrets, masked in public logs. Terraform state lives in Azure, never in the repo.
 - **No stored Azure credentials:** GitHub Actions signs in with OIDC federation, so there's no client secret anywhere.
 
@@ -79,7 +79,7 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 - An Azure account (free tier works)
 - [Terraform](https://developer.hashicorp.com/terraform/install) 1.6+
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-- A domain added to Cloudflare (Free plan), plus a Cloudflare API token scoped to that zone with **Zone → DNS → Edit**, **Zone → Zone Settings → Edit** and **Zone → Cloud Connector → Edit**
+- A domain added to Cloudflare (Free plan), plus a Cloudflare API token scoped to that zone with **Zone → DNS → Edit**, **Zone → Zone Settings → Edit**, **Zone → Cloud Connector → Edit** and **Zone → Cache Purge → Purge**
 
 ## Deploy
 
