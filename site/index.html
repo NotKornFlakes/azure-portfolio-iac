@@ -1,20 +1,433 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My Cloud Portfolio</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 60px auto; padding: 0 16px; line-height: 1.6; color: #1f2937; }
-    h1 { margin-bottom: 0; }
-    .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 999px; font-size: 14px; margin: 4px 4px 0 0; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timothy Fletcher · IT Support & Security Analyst</title>
+<meta name="description" content="Timothy Fletcher — IT Support & Security Analyst. Microsoft Sentinel, KQL, SOAR automation, Azure. Open to remote.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg-2: #10161d;
+    --card: #131b24;
+    --line: #223040;
+    --text: #e6edf3;
+    --muted: #8b9bab;
+    --accent: #3ddc97;
+    --accent-2: #4cc2ff;
+    --warn: #ffb547;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f8fa;
+      --bg-2: #eef2f6;
+      --card: #ffffff;
+      --line: #d8e0e8;
+      --text: #0f1720;
+      --muted: #56657a;
+      --accent: #0f9d63;
+      --accent-2: #0b74c4;
+      --warn: #b56d00;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { font-family: var(--mono); font-weight: 600; color: var(--text); }
+  .brand span { color: var(--accent); }
+  nav ul { list-style: none; display: flex; gap: 22px; margin: 0; padding: 0; }
+  nav ul a { color: var(--muted); font-size: 14px; }
+  nav ul a:hover { color: var(--text); text-decoration: none; }
+  @media (max-width: 640px) { nav ul { display: none; } }
+
+  /* Hero */
+  header.hero { padding: 80px 0 48px; }
+  .prompt { font-family: var(--mono); color: var(--accent); font-size: 14px; margin-bottom: 14px; }
+  .prompt .cursor { display: inline-block; width: 8px; height: 16px; background: var(--accent); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .prompt .cursor { animation: none; } }
+  h1 { font-size: clamp(36px, 6vw, 56px); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.02em; }
+  .role { font-size: clamp(18px, 2.6vw, 22px); color: var(--muted); margin: 0 0 20px; }
+  .role strong { color: var(--text); font-weight: 600; }
+  .summary { max-width: 680px; font-size: 17px; margin: 0 0 24px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .tag {
+    font-family: var(--mono); font-size: 12.5px;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--bg-2); color: var(--muted);
+  }
+  .tag.ok { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+  .buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 15px;
+    border: 1px solid var(--line); color: var(--text); background: var(--card);
+  }
+  .btn:hover { text-decoration: none; border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #06130d; border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn svg { width: 18px; height: 18px; }
+
+  /* Metrics */
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+    margin: 8px 0 72px;
+  }
+  .metric { background: var(--card); padding: 22px 20px; }
+  .metric .num { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--accent); line-height: 1.1; }
+  .metric .lbl { font-size: 13.5px; color: var(--muted); margin-top: 6px; }
+  @media (max-width: 760px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+
+  /* Sections */
+  section { padding: 0 0 72px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; }
+  .sec-head .idx { font-family: var(--mono); color: var(--accent); font-size: 14px; }
+  h2 { font-size: 26px; margin: 0; letter-spacing: -0.01em; }
+
+  /* Projects */
+  .projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 760px) { .projects { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; display: flex; flex-direction: column;
+    transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+  .card .kicker { font-family: var(--mono); font-size: 12px; color: var(--accent-2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .card h3 { margin: 0 0 10px; font-size: 19px; }
+  .card p { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+  .card ul { margin: 0 0 16px; padding-left: 18px; font-size: 14.5px; }
+  .card li { margin-bottom: 6px; }
+  .card li b { color: var(--accent); font-weight: 600; }
+  .card .stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+  .card .stack span { font-family: var(--mono); font-size: 11.5px; color: var(--muted); background: var(--bg-2); border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; }
+  .card .links { margin-top: 14px; font-family: var(--mono); font-size: 13.5px; display: flex; gap: 16px; }
+
+  /* Experience */
+  .timeline { border-left: 2px solid var(--line); margin-left: 6px; }
+  .job { position: relative; padding: 0 0 30px 26px; }
+  .job::before {
+    content: ""; position: absolute; left: -7px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--accent);
+  }
+  .job.past::before { border-color: var(--muted); }
+  .job-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; }
+  .job h3 { margin: 0; font-size: 18px; }
+  .job .org { color: var(--muted); font-weight: 500; }
+  .job .when { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .job ul { margin: 10px 0 0; padding-left: 18px; font-size: 15px; }
+  .job li { margin-bottom: 5px; }
+  .job p { margin: 8px 0 0; font-size: 15px; color: var(--muted); }
+
+  /* Skills */
+  .skills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 760px) { .skills { grid-template-columns: 1fr; } }
+  .skill-group { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .skill-group h3 { margin: 0 0 12px; font-size: 15px; font-family: var(--mono); color: var(--accent); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips span { font-size: 13.5px; padding: 4px 10px; border-radius: 6px; background: var(--bg-2); border: 1px solid var(--line); }
+
+  /* Certs */
+  .certs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 760px) { .certs { grid-template-columns: 1fr; } }
+  .cert { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .cert .k { font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .cert h3 { margin: 6px 0 4px; font-size: 17px; }
+  .cert p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  /* Writing */
+  .posts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .posts li { border-bottom: 1px solid var(--line); }
+  .posts a { display: flex; justify-content: space-between; gap: 16px; padding: 16px 4px; color: var(--text); }
+  .posts a:hover { text-decoration: none; color: var(--accent); }
+  .posts .t { font-weight: 600; }
+  .posts .d { color: var(--muted); font-size: 14px; display: block; font-weight: 400; margin-top: 2px; }
+  .posts .arrow { font-family: var(--mono); color: var(--muted); flex-shrink: 0; }
+  .more { margin-top: 14px; font-family: var(--mono); font-size: 14px; }
+
+  /* Contact / footer */
+  .contact {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 32px; text-align: center;
+  }
+  .contact h2 { margin-bottom: 8px; }
+  .contact p { color: var(--muted); margin: 0 auto 20px; max-width: 520px; }
+  .contact .buttons { justify-content: center; }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; margin-top: 8px; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13.5px; color: var(--muted); }
+  footer code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+</style>
 </head>
 <body>
-  <h1>Hi, I'm [Your Name]</h1>
-  <p>Cloud &amp; infrastructure engineer in training.</p>
-  <span class="tag">Azure</span><span class="tag">Terraform</span><span class="tag">GitHub Actions</span>
-  <h2>About this site</h2>
-  <p>This page is hosted on Azure Storage and was deployed entirely with Terraform. The code is on my GitHub.</p>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">tim<span>@</span>fletcher:~$</a>
+    <ul>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#writing">Writing</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="wrap" id="top">
+
+  <header class="hero">
+    <div class="prompt">$ whoami <span class="cursor" aria-hidden="true"></span></div>
+    <h1>Timothy Fletcher</h1>
+    <p class="role"><strong>IT Support &amp; Security Analyst</strong> · SIEM · Alert Triage · Security Automation</p>
+    <p class="summary">
+      Help Desk Analyst at Upstate Medical University, supporting clinical and administrative staff in an
+      SLA-driven healthcare environment. Outside the queue, I build hands-on security labs in Azure:
+      Microsoft Sentinel detections in KQL, honeypots that catch real attackers, and SOAR playbooks that
+      enrich and contain threats in seconds.
+    </p>
+    <div class="tags">
+      <span class="tag ok">● Open to remote, any shift</span>
+      <span class="tag">ISC2 CC</span>
+      <span class="tag">B.S. Information Science</span>
+      <span class="tag">Microsoft Sentinel</span>
+      <span class="tag">KQL</span>
+      <span class="tag">Azure</span>
+    </div>
+    <div class="buttons">
+      <a class="btn primary" href="#projects">View projects</a>
+      <a class="btn" href="https://www.linkedin.com/in/timcfletch" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+        LinkedIn
+      </a>
+      <a class="btn" href="https://github.com/NotKornFlakes" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg>
+        GitHub
+      </a>
+      <a class="btn" href="resume.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Résumé
+      </a>
+    </div>
+  </header>
+
+  <div class="metrics" aria-label="Project highlights">
+    <div class="metric"><div class="num">1.24M</div><div class="lbl">attack attempts captured by my honeypots in 37 hours</div></div>
+    <div class="metric"><div class="num">~12s</div><div class="lbl">automated triage vs. 10–15 min manual</div></div>
+    <div class="metric"><div class="num">91%</div><div class="lbl">alert noise cut (65 alerts → 6 incidents)</div></div>
+    <div class="metric"><div class="num">13</div><div class="lbl">MITRE ATT&amp;CK techniques mapped from a live intrusion</div></div>
+  </div>
+
+  <section id="projects">
+    <div class="sec-head"><span class="idx">01</span><h2>Security Projects</h2></div>
+    <div class="projects">
+
+      <article class="card">
+        <div class="kicker">Detection &amp; Response</div>
+        <h3>SOC Home Lab: Azure Honeypots + Sentinel</h3>
+        <p>Three internet-facing honeypots feeding Microsoft Sentinel, used to write and test real detections against real attackers.</p>
+        <ul>
+          <li>Deployed Windows RDP, Cowrie SSH and Endlessh honeypots with Azure Monitor Agent and custom log tables; captured <b>1.24M attempts from 75 IPs</b> with zero compromises.</li>
+          <li>Wrote 5 KQL analytics rules (password spray, brute-force-then-success) and rebuilt the low-and-slow rule after v1 missed an attacker guessing once every 12 minutes.</li>
+          <li>Reconstructed an SSH intrusion chain, mapped <b>13 ATT&amp;CK techniques</b>, and identified Panchan, Mirai and Bashlite samples by hash.</li>
+        </ul>
+        <div class="stack"><span>Sentinel</span><span>KQL</span><span>Azure Monitor</span><span>Cowrie</span><span>MITRE ATT&amp;CK</span><span>D3</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/SocHomelab" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
+        <div class="kicker">SOAR Automation</div>
+        <h3>Sentinel SOAR: Automated Brute-Force Response</h3>
+        <p>A Logic App playbook that enriches Sentinel incidents with threat intel and blocks high-risk IPs automatically.</p>
+        <ul>
+          <li>Integrated Sentinel, the AbuseIPDB API and the Azure REST API, running under a least-privilege managed identity.</li>
+          <li>Cut triage to <b>~12 seconds</b> (8–18 s) from 10–15 minutes; blocked IPs made zero further attempts.</li>
+          <li>Per-IP grouping reduced <b>65 alerts to 6 incidents</b>, about 91% less noise for analysts.</li>
+        </ul>
+        <div class="stack"><span>Logic Apps</span><span>AbuseIPDB</span><span>Azure REST API</span><span>NSG</span><span>Managed Identity</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/Sentinel-SOAR-Lab" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
+        <div class="kicker">Data Analysis</div>
+        <h3>HHS Healthcare Breach Analysis</h3>
+        <p>An analysis of every breach reported to HHS OCR, turned into practical guidance for a small clinic.</p>
+        <ul>
+          <li>Cleaned and analyzed <b>8,013 breach records</b> (2009–2026) with Python and pandas.</li>
+          <li>Showed hacking grew to <b>81% of breaches</b> by 2025; published an interactive Plotly dashboard.</li>
+          <li>Wrote a security-budget memo for a 40-person clinic based on the findings.</li>
+        </ul>
+        <div class="stack"><span>Python</span><span>pandas</span><span>Plotly</span><span>Jupyter</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/hhs-breach-analysis" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
+        <div class="kicker">Infrastructure as Code</div>
+        <h3>This Website: Azure + Terraform</h3>
+        <p>The page you're reading is hosted on Azure Storage and deployed entirely with Terraform.</p>
+        <ul>
+          <li>Storage account hardened with TLS 1.2+, HTTPS only, no anonymous blob access and soft delete.</li>
+          <li>GitHub Actions runs fmt, validate and a <b>Checkov security scan</b> on every push, and fails on any unaddressed finding.</li>
+          <li>Each accepted risk is documented in code with a written justification.</li>
+        </ul>
+        <div class="stack"><span>Terraform</span><span>Azure Storage</span><span>GitHub Actions</span><span>Checkov</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/azure-portfolio-iac" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="sec-head"><span class="idx">02</span><h2>Experience</h2></div>
+    <div class="timeline">
+      <div class="job">
+        <div class="job-head">
+          <h3>Help Desk Analyst <span class="org">· Upstate Medical University</span></h3>
+          <span class="when">Oct 2025 – Present</span>
+        </div>
+        <ul>
+          <li>Tier 1 support by phone and ticket for clinical and administrative staff: hardware, software and account access.</li>
+          <li>Administer Active Directory accounts and permissions and Microsoft 365 / Outlook access under least privilege.</li>
+          <li>Manage a personal ticket queue to service-level targets, documenting every incident in the system of record.</li>
+          <li>Escalate complex cases with initial findings and clear handoff notes; flag recurring issues to improve the knowledge base.</li>
+        </ul>
+      </div>
+      <div class="job past">
+        <div class="job-head">
+          <h3>Owner <span class="org">· Self-Employed Home Repair &amp; Remodeling</span></h3>
+          <span class="when">Jan 2021 – Sep 2025</span>
+        </div>
+        <p>Ran client communication, scheduling and on-site diagnosis end to end while completing a B.S. in Information Science full-time.</p>
+      </div>
+      <div class="job past">
+        <div class="job-head">
+          <h3>Project Estimator / Coordinator <span class="org">· TPM General Contractors</span></h3>
+          <span class="when">Jan 2019 – Jan 2021</span>
+        </div>
+        <p>Built insurance claim estimates in Xactimate and tracked schedules across contractors and clients.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head"><span class="idx">03</span><h2>Skills</h2></div>
+    <div class="skills">
+      <div class="skill-group">
+        <h3>// SIEM &amp; Security Ops</h3>
+        <div class="chips">
+          <span>Microsoft Sentinel</span><span>KQL</span><span>Log Analytics</span><span>Logic Apps (SOAR)</span>
+          <span>MITRE ATT&amp;CK</span><span>IOC triage</span><span>Threat intel</span><span>Honeypots</span>
+          <span>Detection tuning</span><span>Incident write-ups</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>// Cloud &amp; Systems</h3>
+        <div class="chips">
+          <span>Azure VMs</span><span>NSG rules</span><span>RBAC</span><span>Managed identity</span>
+          <span>Azure Monitor Agent</span><span>Terraform</span><span>Windows</span><span>Linux (Ubuntu)</span>
+          <span>Active Directory</span><span>Microsoft 365</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>// Support &amp; ITSM</h3>
+        <div class="chips">
+          <span>Ticket queue management</span><span>Incident documentation</span><span>Escalation &amp; handoff</span>
+          <span>Remote troubleshooting</span><span>Phishing awareness</span><span>Knowledge base</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>// Scripting &amp; Reporting</h3>
+        <div class="chips">
+          <span>Python</span><span>pandas</span><span>Plotly</span><span>SQL</span><span>REST APIs</span>
+          <span>Sentinel workbooks</span><span>D3</span><span>Tableau</span><span>Excel</span><span>Git</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="certs">
+    <div class="sec-head"><span class="idx">04</span><h2>Certifications &amp; Education</h2></div>
+    <div class="certs">
+      <div class="cert">
+        <div class="k">Certification · Jul 2025</div>
+        <h3>ISC2 Certified in Cybersecurity (CC)</h3>
+        <p>Security principles, access control, network security and incident response.</p>
+      </div>
+      <div class="cert">
+        <div class="k">Certification</div>
+        <h3>TestOut Security Pro</h3>
+        <p>Hands-on, performance-based security lab certification.</p>
+      </div>
+      <div class="cert">
+        <div class="k">Education · 2024</div>
+        <h3>B.S. Information Science</h3>
+        <p>SUNY Oswego. Cybersecurity, networking, systems analysis, databases. Ongoing TryHackMe labs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="writing">
+    <div class="sec-head"><span class="idx">05</span><h2>Writing</h2></div>
+    <ul class="posts">
+      <li><a href="https://medium.com/@no1listeninghere/why-panic-is-powerful-confessions-from-the-help-desk-a4e94da824fd" target="_blank" rel="noopener">
+        <span><span class="t">Why Panic Is Powerful: Confessions From the Help Desk</span><span class="d">How urgency is used in social engineering, seen from the support side.</span></span>
+        <span class="arrow">↗</span></a></li>
+      <li><a href="https://medium.com/@no1listeninghere/opsec-where-privacy-matters-553fd7e2370d" target="_blank" rel="noopener">
+        <span><span class="t">OPSEC: Where Privacy Matters</span><span class="d">Operational security and why small privacy mistakes add up.</span></span>
+        <span class="arrow">↗</span></a></li>
+      <li><a href="https://medium.com/@no1listeninghere/making-systems-less-complicated-for-system-less-people-dca4cd622211" target="_blank" rel="noopener">
+        <span><span class="t">Making Systems Less Complicated: For System-less People</span><span class="d">Explaining complex systems in plain terms.</span></span>
+        <span class="arrow">↗</span></a></li>
+    </ul>
+    <div class="more"><a href="https://medium.com/@no1listeninghere" target="_blank" rel="noopener">→ All posts on Medium</a></div>
+  </section>
+
+  <section id="contact">
+    <div class="contact">
+      <h2>Let's talk</h2>
+      <p>I'm looking for remote SOC, security analyst or IT support roles, and I'm available for any shift.</p>
+      <div class="buttons">
+        <a class="btn primary" href="https://www.linkedin.com/in/timcfletch" target="_blank" rel="noopener">Message me on LinkedIn</a>
+        <a class="btn" href="resume.pdf" target="_blank" rel="noopener">Download résumé</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Timothy Fletcher</span>
+    <span>Deployed with <code>terraform apply</code> · <a href="https://github.com/NotKornFlakes/azure-portfolio-iac" target="_blank" rel="noopener">view source</a></span>
+  </div>
+</footer>
+
 </body>
 </html>
