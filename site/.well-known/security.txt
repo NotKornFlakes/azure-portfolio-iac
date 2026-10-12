@@ -1,0 +1,7 @@
+# Security contact for timfletcher.tech (RFC 9116).
+# Reports go through GitHub private vulnerability reporting, so no email
+# address is published.
+Contact: https://github.com/NotKornFlakes/azure-portfolio-iac/security/advisories/new
+Expires: 2027-10-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://timfletcher.tech/.well-known/security.txt

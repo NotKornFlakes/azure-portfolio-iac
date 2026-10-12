@@ -64,7 +64,8 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 - **Azure:** TLS 1.2 minimum, HTTPS only, no anonymous blob access, local users disabled, 7-day soft delete for blobs and containers, 1-day SAS token expiry policy.
 - **No storage account keys:** Shared Key access is disabled on both storage accounts. Terraform uploads site files with Entra ID (`storage_use_azuread = true`) using the **Storage Blob Data Contributor** role, so there's no account key that could leak or need rotating.
 - **Cloudflare:** Full (strict) SSL, so Cloudflare validates Azure's certificate; automatic HTTP → HTTPS redirects; TLS 1.2 minimum.
-- **Security headers:** Azure static sites can't send custom headers, so a Cloudflare Transform Rule adds them. The Content-Security-Policy blocks all scripts (the site has none), blocks framing, and only allows fonts from Google Fonts. HSTS keeps browsers on HTTPS.
+- **Security headers:** Azure static sites can't send custom headers, so a Cloudflare Transform Rule adds them. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows fonts from Google Fonts. Graded **A+** by securityheaders.com, Mozilla HTTP Observatory (115/100) and SSL Labs. HSTS keeps browsers on HTTPS.
+- **Vulnerability disclosure:** [`/.well-known/security.txt`](https://timfletcher.tech/.well-known/security.txt) (RFC 9116) points researchers to GitHub private vulnerability reporting, so reports reach me without publishing an email address.
 - **DNSSEC:** DNS answers are signed, so resolvers can detect forged records for the domain.
 - **Email anti-spoofing:** the domain sends no email, and its DNS says so (null MX, SPF `-all`, DMARC `p=reject`, empty DKIM), so mail servers reject phishing that claims to come from it.
 - **Least-privilege credentials:** the Cloudflare API token is scoped to one zone with only DNS, Zone Settings, Cloud Connector and Cache Purge rights. The GitHub Actions token is read-only (`permissions: contents: read`).
@@ -84,6 +85,8 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 | CKV_AZURE_33 – queue logging | Queue service isn't used |
 
 **Accepted risk outside Checkov – the Azure endpoint bypasses Cloudflare.** The site is also reachable directly at its Azure web endpoint (`*.z13.web.core.windows.net`), which skips Cloudflare's cache, headers and DDoS protection. Restricting the storage firewall to Cloudflare's IP ranges would also block GitHub Actions from uploading files, because the Azure data plane would reject the runners' IPs. The risk is low: the endpoint only serves the same public static files, has no secrets or write access, and the $5 budget alert catches any unusual bandwidth cost. A future fix is moving uploads to a self-hosted runner or Azure Front Door with Private Link.
+
+**Accepted risk outside Checkov – legacy TLS 1.2 cipher suites at the edge.** Cloudflare's Free plan offers some older CBC-mode TLS 1.2 ciphers for compatibility, which internet.nl flags as "phase out" (SSL Labs still grades A+, and modern browsers negotiate TLS 1.3). Choosing cipher suites requires Cloudflare's paid Advanced Certificate Manager, and requiring TLS 1.3 only would block some older corporate proxies, so recruiters on locked-down networks might not reach the site. Revisit if the site ever handles logins or personal data.
 
 ## Prerequisites
 
