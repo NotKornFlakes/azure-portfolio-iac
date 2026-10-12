@@ -24,7 +24,6 @@ resource "azurerm_storage_account" "site" {
   #checkov:skip=CKV_AZURE_206:LRS is enough for a dev site whose source of truth is this repo
   #checkov:skip=CKV2_AZURE_1:No sensitive data; Microsoft-managed encryption keys are sufficient
   #checkov:skip=CKV_AZURE_33:Queue service is not used by this project
-  #checkov:skip=CKV2_AZURE_40:Shared Key is used by Terraform to upload blobs; switching to Entra ID auth is on the roadmap
   name                     = local.storage_account_name
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
@@ -36,7 +35,7 @@ resource "azurerm_storage_account" "site" {
   https_traffic_only_enabled      = true
   allow_nested_items_to_be_public = false
   local_user_enabled              = false
-  shared_access_key_enabled       = true
+  shared_access_key_enabled       = false
 
   # Recover accidentally deleted or overwritten files for 7 days
   blob_properties {
