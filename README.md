@@ -71,6 +71,8 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 - **No secrets in Git:** locally, the subscription ID and API token live only in the git-ignored `terraform.tfvars`; in CI they're GitHub Actions secrets, masked in public logs. Terraform state lives in Azure, never in the repo.
 - **No stored Azure credentials:** GitHub Actions signs in with OIDC federation, so there's no client secret anywhere.
 
+**Supply chain:** every GitHub Action is pinned to a full commit hash instead of a version tag, so a compromised or moved tag can't change what runs in the pipeline. Dependabot opens a weekly PR when a new version is released.
+
 **Accepted risks:** some checks don't fit a public website. Each one is suppressed in `main.tf` with a written reason:
 
 | Check | Why it's skipped |
@@ -80,6 +82,8 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 | CKV_AZURE_206 – geo-replication | Dev site; the repo is the source of truth, so LRS keeps cost minimal |
 | CKV2_AZURE_1 – customer-managed keys | No sensitive data; Microsoft-managed keys are sufficient |
 | CKV_AZURE_33 – queue logging | Queue service isn't used |
+
+**Accepted risk outside Checkov – the Azure endpoint bypasses Cloudflare.** The site is also reachable directly at its Azure web endpoint (`*.z13.web.core.windows.net`), which skips Cloudflare's cache, headers and DDoS protection. Restricting the storage firewall to Cloudflare's IP ranges would also block GitHub Actions from uploading files, because the Azure data plane would reject the runners' IPs. The risk is low: the endpoint only serves the same public static files, has no secrets or write access, and the $5 budget alert catches any unusual bandwidth cost. A future fix is moving uploads to a self-hosted runner or Azure Front Door with Private Link.
 
 ## Prerequisites
 
