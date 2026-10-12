@@ -81,6 +81,9 @@ resource "azurerm_storage_blob" "site_files" {
       png  = "image/png"
       jpg  = "image/jpeg"
       svg  = "image/svg+xml"
+      ico  = "image/x-icon"
+      pdf  = "application/pdf"
+      txt  = "text/plain"
     },
     reverse(split(".", each.value))[0],
     "application/octet-stream"

@@ -39,3 +39,20 @@ variable "tags" {
     purpose    = "portfolio"
   }
 }
+
+variable "domain_name" {
+  description = "Custom domain for the site (must already be a zone in Cloudflare)"
+  type        = string
+  default     = "timfletcher.tech"
+}
+
+variable "cloudflare_zone_id" {
+  description = "Zone ID from the Cloudflare dashboard (Overview page, right sidebar)"
+  type        = string
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token scoped to this zone"
+  type        = string
+  sensitive   = true
+}

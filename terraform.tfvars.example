@@ -5,3 +5,8 @@ subscription_id = "00000000-0000-0000-0000-000000000000"
 project_name    = "portfolio"
 environment     = "dev"
 location        = "eastus"
+
+# Custom domain via Cloudflare
+domain_name          = "timfletcher.tech"
+cloudflare_zone_id   = "your-zone-id"
+cloudflare_api_token = "your-scoped-api-token"

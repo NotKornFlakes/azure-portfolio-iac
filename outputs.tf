@@ -12,3 +12,8 @@ output "storage_account_name" {
   description = "Storage account hosting the site"
   value       = azurerm_storage_account.site.name
 }
+
+output "custom_domain_url" {
+  description = "Public URL of the site on the custom domain"
+  value       = "https://${var.domain_name}"
+}

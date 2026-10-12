@@ -10,10 +10,19 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.52"
+    }
   }
 }
 
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
+}
+
+# Scoped API token (DNS, Zone Settings, Cloud Connector on this one zone only)
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
 }
