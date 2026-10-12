@@ -12,7 +12,8 @@
 # Safe to re-run: every step checks whether its resource already exists.
 set -euo pipefail
 
-REPO="NotKornFlakes/azure-portfolio-iac"
+# GitHub OIDC subject uses immutable owner@id/repo@id
+REPO="NotKornFlakes@173021356/azure-portfolio-iac@1414812331"
 LOCATION="eastus"
 SITE_RG="rg-portfolio-dev"
 STATE_RG="rg-portfolio-tfstate"
