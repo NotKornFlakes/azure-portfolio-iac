@@ -28,6 +28,9 @@ provider "azurerm" {
   # GitHub Actions only has rights on this project's resource group, not the
   # whole subscription, so skip subscription-wide provider registration.
   resource_provider_registrations = "none"
+
+  # Upload and read blobs with Entra ID (RBAC) instead of storage account keys
+  storage_use_azuread = true
 }
 
 # Scoped API token (DNS, Zone Settings, Cloud Connector on this one zone only)
