@@ -34,6 +34,7 @@ A static portfolio website hosted on **Azure Storage** behind **Cloudflare**, pr
 | `azurerm_storage_account` | StorageV2, LRS, TLS 1.2+, HTTPS only, account keys disabled, 7-day soft delete, SAS expiry policy |
 | `azurerm_storage_account_static_website` | Enables static site hosting |
 | `azurerm_storage_blob` | Uploads every file in `site/` with the right content type; `content_md5` re-uploads a file whenever its contents change |
+| `azurerm_consumption_budget_resource_group` | $5/month budget on the site's resource group; emails an alert at 85% of actual spend |
 | `cloudflare_record` (apex + www) | Proxied CNAMEs pointing the custom domain at the Azure web endpoint |
 | `cloudflare_cloud_connector_rules` | Rewrites the Host header so Azure Storage serves the custom domain |
 | `cloudflare_zone_settings_override` | Full (strict) TLS to the origin, always HTTPS, TLS 1.2 minimum |
@@ -94,7 +95,7 @@ cp terraform.tfvars.example terraform.tfvars    # for local runs: subscription I
 terraform init -backend-config=backend.hcl
 ```
 
-Then add these repository secrets in GitHub (**Settings → Secrets and variables → Actions**): `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_API_TOKEN`. Also create an environment named `production`.
+Then add these repository secrets in GitHub (**Settings → Secrets and variables → Actions**): `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_API_TOKEN`, `BUDGET_ALERT_EMAIL`. Also create an environment named `production`.
 
 Terraform prints `custom_domain_url` (the Cloudflare address) and `website_url` (the raw Azure endpoint) after each apply.
 
@@ -114,7 +115,7 @@ terraform destroy
 - **Pushing isn't deploying.** `git add`, `commit` and `push` update the repo, and GitHub Actions checks the code. The live site only changes when `terraform apply` runs, which is needed for changes to `site/` or the `.tf` files but not for README edits. I automated that step: merging to `main` now runs `terraform apply` in GitHub Actions through OIDC, and pull requests show a `terraform plan` first.
 - **Read the auth error closely.** My first OIDC deploy failed with `AADSTS700213: No matching federated identity record found`. The error showed that GitHub's token identifies the repo by its immutable IDs (`owner@id/repo@id`), not just its name. Updating the federated credential to match fixed it, and it's more secure, because a renamed or recreated repo can't impersonate mine.
 - **Roll out risky changes in stages.** Turning off storage account keys could have locked Terraform out. I split it into two pull requests: first switch Terraform to Entra ID auth while keys still worked and confirm `terraform plan` showed no changes, then disable the keys.
-- **Cheap to build, but costs add up.** The Azure side costs very little, but the domain renews at about $45/year after a ~$10 first year. I set an Azure budget alert so I'm notified before spending gets close to my monthly limit.
+- **Cheap to build, but costs add up.** The Azure side costs very little, but the domain renews at about $45/year after a ~$10 first year. I manage a $5/month Azure budget in Terraform that emails me at 85% of actual spend, so cost controls are versioned and reviewed like the rest of the infrastructure.
 
 ## Roadmap
 
@@ -124,5 +125,5 @@ terraform destroy
 - [x] Remote state in an Azure Storage backend
 - [x] Deploy from GitHub Actions using OIDC (no stored secrets)
 - [x] Blob uploads with Entra ID auth; Shared Key disabled
-- [ ] Azure budget alert managed in Terraform
+- [x] Azure budget alert managed in Terraform
 - [ ] Visitor counter (Azure Functions + Cosmos DB)

@@ -56,3 +56,31 @@ variable "cloudflare_api_token" {
   type        = string
   sensitive   = true
 }
+
+variable "monthly_budget" {
+  description = "Monthly budget for the site's resource group, in your billing currency"
+  type        = number
+  default     = 5
+}
+
+variable "budget_alert_threshold" {
+  description = "Percent of the monthly budget at which Azure sends an alert email"
+  type        = number
+  default     = 85
+
+  validation {
+    condition     = var.budget_alert_threshold > 0 && var.budget_alert_threshold <= 1000
+    error_message = "budget_alert_threshold must be between 1 and 1000 (percent)."
+  }
+}
+
+variable "budget_alert_email" {
+  description = "Email address that receives budget alerts (kept out of Git)"
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", var.budget_alert_email))
+    error_message = "budget_alert_email must be a valid email address."
+  }
+}
