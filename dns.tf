@@ -59,5 +59,15 @@ resource "cloudflare_zone_settings_override" "tls" {
     always_use_https         = "on"
     min_tls_version          = "1.2"
     automatic_https_rewrites = "on"
+
+    # HSTS: browsers only ever connect over HTTPS for the next year.
+    # nosniff sends X-Content-Type-Options: nosniff.
+    security_header {
+      enabled            = true
+      max_age            = 31536000
+      include_subdomains = true
+      preload            = false
+      nosniff            = true
+    }
   }
 }

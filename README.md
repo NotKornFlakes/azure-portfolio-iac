@@ -38,7 +38,9 @@ A static portfolio website hosted on **Azure Storage** behind **Cloudflare**, pr
 | `cloudflare_record` (apex + www) | Proxied CNAMEs pointing the custom domain at the Azure web endpoint |
 | `cloudflare_record` (MX, SPF, DMARC, DKIM) | Null MX, `v=spf1 -all`, DMARC `p=reject` and an empty DKIM key, so nobody can send email pretending to be this domain |
 | `cloudflare_cloud_connector_rules` | Rewrites the Host header so Azure Storage serves the custom domain |
-| `cloudflare_zone_settings_override` | Full (strict) TLS to the origin, always HTTPS, TLS 1.2 minimum |
+| `cloudflare_zone_settings_override` | Full (strict) TLS to the origin, always HTTPS, TLS 1.2 minimum, HSTS (1 year), `nosniff` |
+| `cloudflare_ruleset` (response headers) | Content-Security-Policy, `X-Frame-Options: DENY`, Referrer-Policy and Permissions-Policy on every response |
+| `cloudflare_zone_dnssec` | Signs DNS answers so forged records are detected |
 
 ## CI/CD
 
@@ -62,6 +64,8 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 - **Azure:** TLS 1.2 minimum, HTTPS only, no anonymous blob access, local users disabled, 7-day soft delete for blobs and containers, 1-day SAS token expiry policy.
 - **No storage account keys:** Shared Key access is disabled on both storage accounts. Terraform uploads site files with Entra ID (`storage_use_azuread = true`) using the **Storage Blob Data Contributor** role, so there's no account key that could leak or need rotating.
 - **Cloudflare:** Full (strict) SSL, so Cloudflare validates Azure's certificate; automatic HTTP → HTTPS redirects; TLS 1.2 minimum.
+- **Security headers:** Azure static sites can't send custom headers, so a Cloudflare Transform Rule adds them. The Content-Security-Policy blocks all scripts (the site has none), blocks framing, and only allows fonts from Google Fonts. HSTS keeps browsers on HTTPS.
+- **DNSSEC:** DNS answers are signed, so resolvers can detect forged records for the domain.
 - **Email anti-spoofing:** the domain sends no email, and its DNS says so (null MX, SPF `-all`, DMARC `p=reject`, empty DKIM), so mail servers reject phishing that claims to come from it.
 - **Least-privilege credentials:** the Cloudflare API token is scoped to one zone with only DNS, Zone Settings, Cloud Connector and Cache Purge rights. The GitHub Actions token is read-only (`permissions: contents: read`).
 - **No secrets in Git:** locally, the subscription ID and API token live only in the git-ignored `terraform.tfvars`; in CI they're GitHub Actions secrets, masked in public logs. Terraform state lives in Azure, never in the repo.
@@ -82,7 +86,7 @@ Every push runs [Checkov](https://www.checkov.io/), and the pipeline **fails** o
 - An Azure account (free tier works)
 - [Terraform](https://developer.hashicorp.com/terraform/install) 1.6+
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-- A domain added to Cloudflare (Free plan), plus a Cloudflare API token scoped to that zone with **Zone → DNS → Edit**, **Zone → Zone Settings → Edit**, **Zone → Cloud Connector → Edit** and **Zone → Cache Purge → Purge**
+- A domain added to Cloudflare (Free plan), plus a Cloudflare API token scoped to that zone with **Zone → DNS → Edit**, **Zone → Zone Settings → Edit**, **Zone → Cloud Connector → Edit**, **Zone → Cache Purge → Purge** and **Zone → Transform Rules → Edit**
 
 ## Deploy
 
