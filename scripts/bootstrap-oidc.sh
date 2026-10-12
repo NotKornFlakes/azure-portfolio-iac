@@ -48,6 +48,8 @@ if ! az storage container-rm show --storage-account "$STATE_SA" --resource-group
 fi
 STATE_SA_ID=$(az storage account show --name "$STATE_SA" --resource-group "$STATE_RG" --query id -o tsv)
 SITE_RG_ID=$(az group show --name "$SITE_RG" --query id -o tsv)
+# The site's storage account (created by Terraform, so it may not exist on a first run)
+SITE_SA_ID=$(az storage account list --resource-group "$SITE_RG" --query "[?starts_with(name, 'stportfolio')].id | [0]" -o tsv)
 
 assign_role() { # $1=object id, $2=principal type, $3=role, $4=scope
   local existing
@@ -61,6 +63,10 @@ assign_role() { # $1=object id, $2=principal type, $3=role, $4=scope
 echo "==> Granting you access to the state container (needed to migrate state)"
 ME=$(az ad signed-in-user show --query id -o tsv)
 assign_role "$ME" User "Storage Blob Data Contributor" "$STATE_SA_ID"
+if [ -n "$SITE_SA_ID" ]; then
+  # Lets local terraform runs upload site files with Entra ID instead of account keys
+  assign_role "$ME" User "Storage Blob Data Contributor" "$SITE_SA_ID"
+fi
 
 echo "==> GitHub Actions identity: $APP_NAME"
 APP_ID=$(az ad app list --display-name "$APP_NAME" --query "[0].appId" -o tsv)
@@ -87,6 +93,12 @@ echo "==> Least-privilege roles for GitHub Actions"
 assign_role "$SP_ID" ServicePrincipal "Contributor" "$SITE_RG_ID"
 # Read and write Terraform state, nothing else in that account
 assign_role "$SP_ID" ServicePrincipal "Storage Blob Data Contributor" "$STATE_SA_ID"
+# Upload site files with Entra ID (storage account keys are disabled)
+if [ -n "$SITE_SA_ID" ]; then
+  assign_role "$SP_ID" ServicePrincipal "Storage Blob Data Contributor" "$SITE_SA_ID"
+else
+  echo "    Site storage account not found yet: run terraform apply, then re-run this script."
+fi
 
 cat > backend.hcl << HCL
 resource_group_name  = "$STATE_RG"
