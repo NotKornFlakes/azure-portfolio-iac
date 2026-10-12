@@ -71,3 +71,15 @@ jobs:
 
       - name: Apply
         run: terraform apply -auto-approve -lock-timeout=5m
+
+      # Cloudflare caches the site at its edge, so clear it after every deploy
+      # or visitors keep seeing the old files. Needs Zone > Cache Purge on the token.
+      - name: Purge Cloudflare cache
+        run: |
+          curl --fail-with-body --silent --show-error -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${TF_VAR_cloudflare_zone_id}/purge_cache" \
+            -H "Authorization: Bearer ${TF_VAR_cloudflare_api_token}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}' \
+            | jq -e '.success' > /dev/null
+          echo "Cloudflare cache purged"
