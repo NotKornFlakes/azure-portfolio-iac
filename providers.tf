@@ -1,6 +1,10 @@
 terraform {
   required_version = ">= 1.6.0"
 
+  # Remote state in Azure Storage. Settings live in backend.hcl (written by
+  # scripts/bootstrap-oidc.sh): terraform init -backend-config=backend.hcl
+  backend "azurerm" {}
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -20,6 +24,10 @@ terraform {
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
+
+  # GitHub Actions only has rights on this project's resource group, not the
+  # whole subscription, so skip subscription-wide provider registration.
+  resource_provider_registrations = "none"
 }
 
 # Scoped API token (DNS, Zone Settings, Cloud Connector on this one zone only)

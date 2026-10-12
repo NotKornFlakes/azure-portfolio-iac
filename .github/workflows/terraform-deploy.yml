@@ -1,0 +1,73 @@
+name: Terraform Deploy
+
+# Pull request -> terraform plan (preview only)
+# Merge to main -> terraform apply (deploys the live site)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "backend.hcl"
+      - ".terraform.lock.hcl"
+      - "site/**"
+      - ".github/workflows/terraform-deploy.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "backend.hcl"
+      - ".terraform.lock.hcl"
+      - "site/**"
+      - ".github/workflows/terraform-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # lets the job request an OIDC token to sign in to Azure
+
+# Never run two Terraform jobs at once
+concurrency:
+  group: terraform-deploy
+  cancel-in-progress: false
+
+env:
+  # Azure sign-in through OIDC. No client secret exists anywhere.
+  ARM_USE_OIDC: "true"
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Init
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Plan
+        run: terraform plan -lock-timeout=5m
+
+  apply:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Init
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Apply
+        run: terraform apply -auto-approve -lock-timeout=5m
