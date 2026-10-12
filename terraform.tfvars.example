@@ -10,3 +10,6 @@ location        = "eastus"
 domain_name          = "timfletcher.tech"
 cloudflare_zone_id   = "your-zone-id"
 cloudflare_api_token = "your-scoped-api-token"
+
+# Budget alert (the email stays in your git-ignored terraform.tfvars)
+budget_alert_email = "you@example.com"
