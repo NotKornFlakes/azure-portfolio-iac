@@ -137,4 +137,3 @@ terraform destroy
 - [x] Blob uploads with Entra ID auth; Shared Key disabled
 - [x] Azure budget alert managed in Terraform
 - [ ] Visitor counter (Azure Functions + Cosmos DB)
-
