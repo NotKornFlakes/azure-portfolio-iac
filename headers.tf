@@ -3,12 +3,12 @@
 # HSTS and X-Content-Type-Options are set in dns.tf (zone settings).
 
 locals {
-  # The site has no JavaScript, so scripts are blocked entirely. Inline styles
-  # are allowed because the pages use a <style> block and style attributes.
+  # The site has no JavaScript, so scripts are blocked entirely. Styles only
+  # load from site/styles.css and Google Fonts; inline styles are blocked.
   content_security_policy = join("; ", [
     "default-src 'none'",
     "script-src 'none'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src 'self' https://fonts.googleapis.com",
     "font-src https://fonts.gstatic.com",
     "img-src 'self' data:",
     "frame-ancestors 'none'",
