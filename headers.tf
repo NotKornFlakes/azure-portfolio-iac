@@ -31,12 +31,14 @@ resource "cloudflare_ruleset" "security_headers" {
     expression  = "true"
     action      = "rewrite"
 
+    # Keep headers in alphabetical order by name: Cloudflare returns them
+    # sorted, and the provider reports an error if the order differs.
     action_parameters {
-      # Nobody can embed the site in a frame (clickjacking)
+      # Turn off browser features the site never uses
       headers {
-        name      = "X-Frame-Options"
+        name      = "Permissions-Policy"
         operation = "set"
-        value     = "DENY"
+        value     = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
       }
       # Send only the origin, never full URLs, to other sites
       headers {
@@ -44,11 +46,11 @@ resource "cloudflare_ruleset" "security_headers" {
         operation = "set"
         value     = "strict-origin-when-cross-origin"
       }
-      # Turn off browser features the site never uses
+      # Nobody can embed the site in a frame (clickjacking)
       headers {
-        name      = "Permissions-Policy"
+        name      = "X-Frame-Options"
         operation = "set"
-        value     = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        value     = "DENY"
       }
     }
   }
