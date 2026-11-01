@@ -22,7 +22,8 @@ on:
 permissions:
   contents: read
 
-# Never run two Terraform jobs at once
+# Never run two Terraform jobs at once. timeout-minutes on each job means a
+# hung run can't hold this group (and the state lock) forever.
 concurrency:
   group: terraform-deploy
   cancel-in-progress: false
@@ -41,12 +42,18 @@ env:
 
 jobs:
   plan:
+    name: plan
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.17.1
 
       - name: Init
         run: terraform init
@@ -55,13 +62,19 @@ jobs:
         run: terraform plan -lock-timeout=5m
 
   apply:
+    name: apply
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: production
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.17.1
 
       - name: Init
         run: terraform init

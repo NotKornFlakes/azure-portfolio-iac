@@ -44,7 +44,7 @@ The email, TLS, header and DNSSEC resources existed before state moved to R2, so
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `terraform-ci.yml` | Every push and PR | `fmt`, `validate`, Checkov scan of the Terraform and the workflows; fails on any unaddressed finding |
+| `terraform-ci.yml` | Every push and PR | `fmt`, `validate`, Checkov scan of the Terraform and the workflows, zizmor scan of the workflows; fails on any unaddressed finding |
 | `terraform-deploy.yml` | Pull request | `terraform plan`, a preview of what would change |
 | `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment |
 
@@ -61,7 +61,7 @@ A concurrency group stops two Terraform runs from overlapping, and the state is 
 
 ## Security scanning
 
-Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitHub Actions workflows, and the pipeline **fails** on any unaddressed finding. Checkov has no Cloudflare policies yet, so today the workflow checks do most of the work: no write-all permissions, no shell injection, no secrets passed to `curl`.
+Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitHub Actions workflows, and [zizmor](https://docs.zizmor.sh/) on the workflows, and the pipeline **fails** on any unaddressed finding. Checkov has no Cloudflare policies yet, so today the workflow checks do most of the work: no write-all permissions, no shell injection, no secrets passed to `curl`. zizmor goes deeper on GitHub Actions specifically: template injection, credentials left in the checkout, impostor commits behind a pinned hash, and Dependabot settings.
 
 **Hardening applied:**
 - **No origin server:** the files are served from Cloudflare's edge, and the `workers.dev` and preview URLs are off, so every request goes through the zone's TLS settings and security headers.
@@ -74,7 +74,7 @@ Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitH
 - **Least-privilege credentials:** the API token can only edit Workers scripts on the account and DNS, zone settings and transform rules on one zone. The R2 token only reaches the state bucket. The GitHub Actions token is read-only (`permissions: contents: read`).
 - **No secrets in Git:** locally, the account ID, zone ID and API token live only in the git-ignored `terraform.tfvars`; in CI they're GitHub Actions secrets, masked in public logs.
 
-**Supply chain:** every GitHub Action is pinned to a full commit hash instead of a version tag, so a compromised or moved tag can't change what runs in the pipeline. Dependabot opens a weekly PR when a new version is released. The Cloudflare provider is pinned in `.terraform.lock.hcl` with its checksums.
+**Supply chain:** every GitHub Action is pinned to a full commit hash instead of a version tag, so a compromised or moved tag can't change what runs in the pipeline. Dependabot opens a weekly PR when a new version is released, but only once that version is a week old, so a malicious release is likely to be caught by someone else first. The Cloudflare provider is pinned in `.terraform.lock.hcl` with its checksums, and every job uses the same pinned Terraform version. Checkouts don't keep the GitHub token in `.git/config` (`persist-credentials: false`), and every job has a timeout so a hung run can't hold the state lock.
 
 **Accepted risk – long-lived Cloudflare tokens.** The Azure version signed in through OIDC, so no Azure secret existed anywhere. The Cloudflare API token and R2 token are stored secrets instead. They're scoped as narrowly as Cloudflare allows, `apply` only runs after approval in the `production` environment, and both tokens should have an expiry date so they get rotated.
 
