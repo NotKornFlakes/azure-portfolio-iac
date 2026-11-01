@@ -83,3 +83,12 @@ jobs:
       # Workers serves the changed files without one (tested from outside).
       - name: Apply
         run: terraform apply -auto-approve -lock-timeout=5m
+
+      # A green apply only proves Cloudflare's API accepted the config. This
+      # checks what visitors actually get: HTTPS, security headers, DNSSEC,
+      # email records, security.txt. Results show on the run's summary page.
+      # The wait gives the edge a moment to pick up new rules.
+      - name: Verify live controls
+        run: |
+          sleep 30
+          bash scripts/verify-live.sh

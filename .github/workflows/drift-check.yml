@@ -1,0 +1,74 @@
+name: Weekly Drift and Control Check
+
+# Catches what the deploy pipeline can't see between deploys:
+# - drift: a change made outside Terraform (an edit in the Cloudflare
+#   dashboard, a setting changed on Cloudflare's side)
+# - broken controls: a header, redirect, DNSSEC or email record that
+#   stopped working, or security.txt about to expire
+# A failed run sends the repo owner a GitHub notification. Run it by hand
+# from the Actions tab.
+on:
+  schedule:
+    - cron: "17 13 * * 1" # Mondays 13:17 UTC (8:17 or 9:17 a.m. New York)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Same group as terraform-deploy.yml, so a check never overlaps an apply
+concurrency:
+  group: terraform-deploy
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    name: drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Secrets live on this job only; the controls job never sees them
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_ENDPOINT_URL_S3: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      # The wrapper is off so terraform's own exit code reaches the script
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.17.1
+          terraform_wrapper: false
+
+      - name: Init
+        run: terraform init
+
+      # main is always applied, so any planned change means the live config
+      # no longer matches the code. -detailed-exitcode: 0 = none, 2 = changes.
+      - name: Plan
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -lock-timeout=5m
+          status=$?
+          if [ "$status" -eq 2 ]; then
+            echo "::error title=Drift detected::The live Cloudflare config differs from main. Read the plan above, then put the change in code or re-run the deploy to undo it."
+          fi
+          exit "$status"
+
+  controls:
+    name: controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Verify live controls
+        run: bash scripts/verify-live.sh

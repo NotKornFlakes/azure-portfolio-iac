@@ -46,7 +46,8 @@ The email, TLS, header and DNSSEC resources existed before state moved to R2, so
 |---|---|---|
 | `terraform-ci.yml` | Every push and PR | `fmt`, `validate`, Checkov scan of the Terraform and the workflows, zizmor scan of the workflows; fails on any unaddressed finding |
 | `terraform-deploy.yml` | Pull request | `terraform plan`, a preview of what would change |
-| `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment |
+| `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment, then [`verify-live.sh`](scripts/verify-live.sh) checks the live site from outside |
+| `drift-check.yml` | Mondays, or by hand | `terraform plan -detailed-exitcode` to catch changes made outside Terraform, and `verify-live.sh` to catch controls that stopped working |
 
 There's no cache purge step: each deploy uploads a new asset manifest, and Workers serves the new files without one. I tested this from outside: a file Cloudflare had cached was replaced on the first request after `terraform apply` finished.
 
@@ -58,6 +59,29 @@ There's no cache purge step: each deploy uploads a new asset manifest, and Worke
 A concurrency group stops two Terraform runs from overlapping, and the state is locked during each run with a `.tflock` object. R2 checks `If-None-Match` on writes atomically, so only one run can create the lock.
 
 **Terraform state** lives in the R2 bucket `timfletcher-tfstate`, never in the repo. The account endpoint and R2 keys come from environment variables (`AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), so nothing account-specific is committed.
+
+## Checking it from the outside
+
+A green `terraform apply` only proves Cloudflare's API accepted the config. [`scripts/verify-live.sh`](scripts/verify-live.sh) checks what a visitor actually gets, using only public requests:
+
+| Area | Checks |
+|---|---|
+| HTTPS | HTTP redirects to HTTPS; apex and `www` both serve the site |
+| Headers | HSTS (1 year, subdomains), `nosniff`, `X-Frame-Options`, Referrer-Policy, Permissions-Policy, COOP, CORP |
+| CSP | Blocks scripts, framing, `<base>` and form targets; allows no `unsafe-*`, no wildcards and no third-party origins |
+| Other responses | Unknown paths return 404 *with* a CSP; the résumé is a PDF that can't be framed; fonts are cached for a year |
+| security.txt | Served, and fails 30 days before `Expires` so it gets renewed in time |
+| DNS | DNSSEC validates (AD flag from Google's resolver, not Cloudflare's); null MX, SPF `-all`, DMARC `p=reject` |
+
+It runs after every deploy and every Monday, and writes a pass/fail table to the run's summary page. The Monday run also does a `terraform plan -detailed-exitcode`: `main` is always applied, so any planned change means someone or something changed the live config outside Terraform (drift). A failed run sends me a GitHub notification (by email, with default settings). GitHub pauses scheduled workflows after 60 days without a commit, so a quiet repo needs the workflow re-enabled now and then.
+
+The script was tested against a local mock of the site in both directions: everything passes against the correct config, and removing a header, loosening the CSP, breaking the redirect, dropping DNSSEC or letting security.txt near its expiry each fails the right check.
+
+Run it yourself on Linux or WSL:
+
+```bash
+bash scripts/verify-live.sh
+```
 
 ## Security scanning
 
@@ -162,4 +186,7 @@ The site first ran on Azure Storage behind Cloudflare (see [History](#history)),
 - [x] Azure version: remote state in Azure Storage, OIDC deploys, Entra ID blob uploads, budget alert
 - [x] Security review fixes: email anti-spoofing, security headers (A+), DNSSEC, pinned actions, branch protection
 - [x] Move hosting to Workers static assets and state to R2; remove Azure
+- [x] Self-hosted fonts (first-party-only CSP), COOP/CORP, long cache for fonts
+- [x] zizmor workflow scanning, Dependabot cooldown, no persisted checkout credentials
+- [x] Live control checks after every deploy, plus weekly drift detection
 - [ ] Visitor counter (Workers + D1)
