@@ -30,7 +30,7 @@ A static portfolio website served by **Cloudflare Workers static assets**, provi
 
 | Resource | Purpose |
 |---|---|
-| `cloudflare_workers_script` | A Worker with static assets and no code. Uploads every file in `site/`; the provider hashes the folder at plan time, so any changed file shows up in `terraform plan`. Unknown paths get `404.html` with a 404 status |
+| `cloudflare_workers_script` | A Worker with static assets and no code. Uploads every file in `site/`; the provider hashes the folder at plan time, so any changed file shows up in `terraform plan`. Unknown paths get `404.html` with a 404 status, and the versioned font files are cached by browsers for a year |
 | `cloudflare_workers_custom_domain` (apex + www) | Routes both hostnames to the Worker; Cloudflare creates their DNS records and TLS certificate |
 | `cloudflare_workers_script_subdomain` | Turns off the `*.workers.dev` URL and preview URLs, so the site is only reachable through the zone and its security settings |
 | `cloudflare_dns_record` (MX, SPF, DMARC, DKIM) | Null MX, `v=spf1 -all`, DMARC `p=reject` and an empty DKIM key, so nobody can send email pretending to be this domain |
@@ -66,7 +66,8 @@ Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitH
 **Hardening applied:**
 - **No origin server:** the files are served from Cloudflare's edge, and the `workers.dev` and preview URLs are off, so every request goes through the zone's TLS settings and security headers.
 - **Cloudflare TLS:** Full (strict) SSL, automatic HTTP → HTTPS redirects, TLS 1.2 minimum.
-- **Security headers:** a Cloudflare Transform Rule adds them to every response. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows fonts from Google Fonts. Graded **A+** by securityheaders.com, Mozilla HTTP Observatory (115/100) and SSL Labs. HSTS keeps browsers on HTTPS.
+- **Security headers:** a Cloudflare Transform Rule adds them to every response. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows styles, fonts and images from the site itself.
+- **No third parties:** the fonts are self-hosted in `site/fonts/` instead of loaded from Google Fonts, so a visit sends nothing to anyone but Cloudflare, and there's no outside server that could change what the page loads. The CSP enforces this: it has no allowed domain other than `'self'`. Graded **A+** by securityheaders.com, Mozilla HTTP Observatory (115/100) and SSL Labs. HSTS keeps browsers on HTTPS.
 - **Vulnerability disclosure:** [`/.well-known/security.txt`](https://timfletcher.tech/.well-known/security.txt) (RFC 9116) points researchers to GitHub private vulnerability reporting, so reports reach me without publishing an email address.
 - **DNSSEC:** DNS answers are signed, so resolvers can detect forged records for the domain.
 - **Email anti-spoofing:** the domain sends no email, and its DNS says so (null MX, SPF `-all`, DMARC `p=reject`, empty DKIM), so mail servers reject phishing that claims to come from it.

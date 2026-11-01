@@ -3,14 +3,15 @@
 # HSTS and X-Content-Type-Options are set in tls.tf (zone settings).
 
 locals {
-  # The site has no JavaScript, so scripts are blocked entirely. Styles only
-  # load from site/styles.css and Google Fonts; inline styles are blocked.
+  # The site has no JavaScript, so scripts are blocked entirely. Styles and
+  # fonts only load from the site itself (site/styles.css, site/fonts/), so
+  # no third party is allowed anywhere and inline styles are blocked.
   content_security_policy = join("; ", [
     "default-src 'none'",
     "script-src 'none'",
-    "style-src 'self' https://fonts.googleapis.com",
-    "font-src https://fonts.gstatic.com",
-    "img-src 'self' data:",
+    "style-src 'self'",
+    "font-src 'self'",
+    "img-src 'self'",
     "frame-ancestors 'none'",
     "base-uri 'none'",
     "form-action 'none'",

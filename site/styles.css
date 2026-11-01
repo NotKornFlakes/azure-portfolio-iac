@@ -1,5 +1,26 @@
 /* Site styles: kept in a separate file so the Content-Security-Policy
    can block inline styles (no 'unsafe-inline'). */
+
+/* Fonts are served from this site, not Google Fonts, so visitors' IP
+   addresses never reach a third party and the CSP only allows 'self'.
+   Variable fonts: one file covers every weight. The version is in the
+   file name because browsers may cache /fonts/* for a year (main.tf).
+   Licenses: /fonts/LICENSE-*.txt (SIL Open Font License 1.1). */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-4.001-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-2.211-latin.woff2") format("woff2");
+}
+
 :root {
   --bg: #0b0f14;
   --bg-2: #10161d;
