@@ -1,0 +1,8 @@
+{
+  // VS Code suggests these when the folder is opened
+  "recommendations": [
+    "hashicorp.terraform",
+    "github.vscode-github-actions",
+    "timonwong.shellcheck"
+  ]
+}
