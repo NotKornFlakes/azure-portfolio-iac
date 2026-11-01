@@ -35,7 +35,7 @@ A static portfolio website served by **Cloudflare Workers static assets**, provi
 | `cloudflare_workers_script_subdomain` | Turns off the `*.workers.dev` URL and preview URLs, so the site is only reachable through the zone and its security settings |
 | `cloudflare_dns_record` (MX, SPF, DMARC, DKIM) | Null MX, `v=spf1 -all`, DMARC `p=reject` and an empty DKIM key, so nobody can send email pretending to be this domain |
 | `cloudflare_zone_setting` (×5) | Full (strict) TLS, always HTTPS, TLS 1.2 minimum, automatic HTTPS rewrites, HSTS (1 year) with `nosniff` |
-| `cloudflare_ruleset` (response headers) | Content-Security-Policy, `X-Frame-Options: DENY`, Referrer-Policy and Permissions-Policy on every response |
+| `cloudflare_ruleset` (response headers) | Content-Security-Policy, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy and the Cross-Origin-Opener/Resource policies on every response |
 | `cloudflare_zone_dnssec` | Signs DNS answers so forged records are detected; `prevent_destroy` stops Terraform from turning it off while the registry still has the DS record |
 
 The email, TLS, header and DNSSEC resources existed before state moved to R2, so [`imports.tf`](imports.tf) adopts them with `import` blocks instead of recreating them. Once a resource is in state its import block does nothing, so the blocks stay as a record of the IDs and can rebuild the state if it's ever lost.
@@ -66,7 +66,7 @@ Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitH
 **Hardening applied:**
 - **No origin server:** the files are served from Cloudflare's edge, and the `workers.dev` and preview URLs are off, so every request goes through the zone's TLS settings and security headers.
 - **Cloudflare TLS:** Full (strict) SSL, automatic HTTP → HTTPS redirects, TLS 1.2 minimum.
-- **Security headers:** a Cloudflare Transform Rule adds them to every response. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows styles, fonts and images from the site itself.
+- **Security headers:** a Cloudflare Transform Rule adds them to every response. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows styles, fonts and images from the site itself. `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` (both `same-origin`) stop other sites from scripting a window they opened to this one or loading its files.
 - **No third parties:** the fonts are self-hosted in `site/fonts/` instead of loaded from Google Fonts, so a visit sends nothing to anyone but Cloudflare, and there's no outside server that could change what the page loads. The CSP enforces this: it has no allowed domain other than `'self'`. Graded **A+** by securityheaders.com, Mozilla HTTP Observatory (115/100) and SSL Labs. HSTS keeps browsers on HTTPS.
 - **Vulnerability disclosure:** [`/.well-known/security.txt`](https://timfletcher.tech/.well-known/security.txt) (RFC 9116) points researchers to GitHub private vulnerability reporting, so reports reach me without publishing an email address.
 - **DNSSEC:** DNS answers are signed, so resolvers can detect forged records for the domain.

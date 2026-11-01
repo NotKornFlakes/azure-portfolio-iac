@@ -35,6 +35,18 @@ resource "cloudflare_ruleset" "security_headers" {
 
       action_parameters = {
         headers = {
+          # Pages opened from another site get their own browsing context,
+          # so the other window can't script or navigate this one
+          "Cross-Origin-Opener-Policy" = {
+            operation = "set"
+            value     = "same-origin"
+          }
+          # Other sites can't load these files as images, scripts or
+          # embeds (blocks hotlinking and cross-origin data leaks)
+          "Cross-Origin-Resource-Policy" = {
+            operation = "set"
+            value     = "same-origin"
+          }
           # Turn off browser features the site never uses
           "Permissions-Policy" = {
             operation = "set"
