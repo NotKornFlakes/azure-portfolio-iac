@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<title>Timothy Fletcher · IT Support & Security Analyst</title>
-<meta name="description" content="Timothy Fletcher — IT Support & Security Analyst. Microsoft Sentinel, KQL, SOAR automation, Azure. Open to remote.">
+<title>Timothy Fletcher · Security Analyst</title>
+<meta name="description" content="Timothy Fletcher, security analyst: Microsoft 365, Microsoft Sentinel detections in KQL, SOAR automation and change-controlled infrastructure as code. Open to remote or Syracuse, NY.">
 <link rel="canonical" href="https://timfletcher.tech/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/inter-4.001-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -32,20 +32,22 @@
   <header class="hero">
     <div class="prompt">$ whoami <span class="cursor" aria-hidden="true"></span></div>
     <h1>Timothy Fletcher</h1>
-    <p class="role"><strong>IT Support &amp; Security Analyst</strong> · SIEM · Alert Triage · Security Automation</p>
+    <p class="role"><strong>Security Analyst</strong> · Microsoft 365 · Sentinel · Detection &amp; Response</p>
     <p class="summary">
-      Help Desk Analyst at Upstate Medical University, supporting clinical and administrative staff in an
-      SLA-driven healthcare environment. Outside the queue, I build hands-on security labs in Azure:
-      Microsoft Sentinel detections in KQL, honeypots that catch real attackers, and SOAR playbooks that
-      enrich and contain threats in seconds.
+      Security for small, regulated organizations, run the way I run my own infrastructure: monitored,
+      documented, and changed only through review. By day I'm a Help Desk Analyst at Upstate Medical
+      University, handling account access and incidents for clinical staff in Active Directory and
+      Microsoft 365. In my own labs I write Microsoft Sentinel detections against real attackers,
+      automate the response, and harden infrastructure in code.
     </p>
     <div class="tags">
-      <span class="tag ok">● Open to remote, any shift</span>
+      <span class="tag ok">● Open to remote or Syracuse, NY · any shift</span>
       <span class="tag">ISC2 CC</span>
-      <span class="tag">B.A. Information Science</span>
+      <span class="tag">Microsoft 365</span>
+      <span class="tag">Active Directory</span>
       <span class="tag">Microsoft Sentinel</span>
       <span class="tag">KQL</span>
-      <span class="tag">Azure</span>
+      <span class="tag">Terraform</span>
     </div>
     <div class="buttons">
       <a class="btn primary" href="#projects">View projects</a>
@@ -106,6 +108,19 @@
       </article>
 
       <article class="card">
+        <div class="kicker">Hardening &amp; Change Control</div>
+        <h3>This Website: Cloudflare + Terraform</h3>
+        <p>The page you're reading has no origin server, is deployed entirely from code, and every change is reviewed before it goes live.</p>
+        <ul>
+          <li>Every change goes through a pull request, a reviewed Terraform plan and an approval gate; nobody pushes straight to production, admins included.</li>
+          <li><b>21 automated checks</b> verify the live headers, HTTPS, DNSSEC and email records after each deploy, and a weekly run flags drift from the code.</li>
+          <li>Email anti-spoofing (SPF, DKIM, DMARC reject), DNSSEC and a CSP that allows no third parties; graded <b>A+</b> by securityheaders.com and SSL Labs.</li>
+        </ul>
+        <div class="stack"><span>Terraform</span><span>Cloudflare</span><span>GitHub Actions</span><span>Checkov</span><span>zizmor</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/portfolio-iac" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
         <div class="kicker">Data Analysis</div>
         <h3>HHS Healthcare Breach Analysis</h3>
         <p>An analysis of every breach reported to HHS OCR, turned into practical guidance for a small clinic.</p>
@@ -116,19 +131,6 @@
         </ul>
         <div class="stack"><span>Python</span><span>pandas</span><span>Plotly</span><span>Jupyter</span></div>
         <div class="links"><a href="https://github.com/NotKornFlakes/hhs-breach-analysis" target="_blank" rel="noopener">→ GitHub</a></div>
-      </article>
-
-      <article class="card">
-        <div class="kicker">Infrastructure as Code</div>
-        <h3>This Website: Cloudflare + Terraform</h3>
-        <p>The page you're reading is served from Cloudflare's edge by Workers static assets and deployed entirely with Terraform.</p>
-        <ul>
-          <li>No origin server; security headers, HSTS, DNSSEC and email anti-spoofing records are all managed in code.</li>
-          <li>GitHub Actions runs fmt, validate and a <b>Checkov security scan</b> on every push, and fails on any unaddressed finding.</li>
-          <li>Started on Azure Storage, then moved to Cloudflare by importing the live config into new Terraform state.</li>
-        </ul>
-        <div class="stack"><span>Terraform</span><span>Cloudflare Workers</span><span>R2</span><span>GitHub Actions</span><span>Checkov</span></div>
-        <div class="links"><a href="https://github.com/NotKornFlakes/portfolio-iac" target="_blank" rel="noopener">→ GitHub</a></div>
       </article>
 
     </div>
@@ -180,9 +182,10 @@
       <div class="skill-group">
         <h3>// Cloud &amp; Systems</h3>
         <div class="chips">
+          <span>Active Directory</span><span>Microsoft 365</span><span>Windows</span><span>Linux (Ubuntu)</span>
           <span>Azure VMs</span><span>NSG rules</span><span>RBAC</span><span>Managed identity</span>
-          <span>Azure Monitor Agent</span><span>Terraform</span><span>Windows</span><span>Linux (Ubuntu)</span>
-          <span>Active Directory</span><span>Microsoft 365</span>
+          <span>Azure Monitor Agent</span><span>Terraform</span><span>Cloudflare</span>
+          <span>Email authentication (SPF, DKIM, DMARC)</span>
         </div>
       </div>
       <div class="skill-group">
@@ -242,7 +245,7 @@
   <section id="contact">
     <div class="contact">
       <h2>Let's talk</h2>
-      <p>I'm looking for remote SOC, security analyst or IT support roles, and I'm available for any shift.</p>
+      <p>I'm looking for security analyst roles, especially with MSPs and MSSPs that protect small law, finance and healthcare offices. Remote or Syracuse, NY, any shift.</p>
       <div class="buttons">
         <a class="btn primary" href="https://www.linkedin.com/in/timcfletch" target="_blank" rel="noopener">Message me on LinkedIn</a>
         <a class="btn" href="resume.pdf" target="_blank" rel="noopener">Download résumé</a>
