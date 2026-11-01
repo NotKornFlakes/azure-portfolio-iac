@@ -8,13 +8,27 @@ on:
 permissions:
   contents: read
 
+# A new push to the same branch or PR cancels the run it replaces
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
+    name: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      # persist-credentials: false keeps the GitHub token out of .git/config,
+      # so no later step or uploaded file can pick it up
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
+      # Same Terraform version in CI, plan and apply; bump it on purpose
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.17.1
 
       - name: Format check
         run: terraform fmt -check -recursive
@@ -33,3 +47,13 @@ jobs:
           directory: .
           framework: terraform,github_actions
           soft_fail: false
+
+      # zizmor is a linter for GitHub Actions security: template injection,
+      # leaked credentials, unpinned or impostor actions, risky triggers.
+      # Findings print as annotations on the PR and fail the job.
+      - name: Workflow security scan (zizmor)
+        uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
+        with:
+          version: 1.31.1
+          advanced-security: false
+          annotations: true

@@ -7,5 +7,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Wait a week before proposing a new release. Malicious releases are
+    # usually spotted and pulled within days, so a short delay means never
+    # being among the first to run one.
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "ci"

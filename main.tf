@@ -18,6 +18,15 @@ resource "cloudflare_workers_script" "site" {
       # /about.html is served at /about; unknown paths get 404.html with a 404
       html_handling      = "auto-trailing-slash"
       not_found_handling = "404-page"
+
+      # Same format as a _headers file. Other files keep the Workers default
+      # (revalidate on every visit) so edits show up right away. Font files
+      # never change under the same name (the version is in the file name),
+      # so browsers may keep them for a year.
+      headers = <<-EOT
+        /fonts/*
+          Cache-Control: public, max-age=31536000, immutable
+      EOT
     }
   }
 }

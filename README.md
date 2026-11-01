@@ -30,12 +30,12 @@ A static portfolio website served by **Cloudflare Workers static assets**, provi
 
 | Resource | Purpose |
 |---|---|
-| `cloudflare_workers_script` | A Worker with static assets and no code. Uploads every file in `site/`; the provider hashes the folder at plan time, so any changed file shows up in `terraform plan`. Unknown paths get `404.html` with a 404 status |
+| `cloudflare_workers_script` | A Worker with static assets and no code. Uploads every file in `site/`; the provider hashes the folder at plan time, so any changed file shows up in `terraform plan`. Unknown paths get `404.html` with a 404 status, and the versioned font files are cached by browsers for a year |
 | `cloudflare_workers_custom_domain` (apex + www) | Routes both hostnames to the Worker; Cloudflare creates their DNS records and TLS certificate |
 | `cloudflare_workers_script_subdomain` | Turns off the `*.workers.dev` URL and preview URLs, so the site is only reachable through the zone and its security settings |
 | `cloudflare_dns_record` (MX, SPF, DMARC, DKIM) | Null MX, `v=spf1 -all`, DMARC `p=reject` and an empty DKIM key, so nobody can send email pretending to be this domain |
 | `cloudflare_zone_setting` (×5) | Full (strict) TLS, always HTTPS, TLS 1.2 minimum, automatic HTTPS rewrites, HSTS (1 year) with `nosniff` |
-| `cloudflare_ruleset` (response headers) | Content-Security-Policy, `X-Frame-Options: DENY`, Referrer-Policy and Permissions-Policy on every response |
+| `cloudflare_ruleset` (response headers) | Content-Security-Policy, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy and the Cross-Origin-Opener/Resource policies on every response |
 | `cloudflare_zone_dnssec` | Signs DNS answers so forged records are detected; `prevent_destroy` stops Terraform from turning it off while the registry still has the DS record |
 
 The email, TLS, header and DNSSEC resources existed before state moved to R2, so [`imports.tf`](imports.tf) adopts them with `import` blocks instead of recreating them. Once a resource is in state its import block does nothing, so the blocks stay as a record of the IDs and can rebuild the state if it's ever lost.
@@ -44,9 +44,10 @@ The email, TLS, header and DNSSEC resources existed before state moved to R2, so
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `terraform-ci.yml` | Every push and PR | `fmt`, `validate`, Checkov scan of the Terraform and the workflows; fails on any unaddressed finding |
+| `terraform-ci.yml` | Every push and PR | `fmt`, `validate`, Checkov scan of the Terraform and the workflows, zizmor scan of the workflows; fails on any unaddressed finding |
 | `terraform-deploy.yml` | Pull request | `terraform plan`, a preview of what would change |
-| `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment |
+| `terraform-deploy.yml` | Merge to `main` | `terraform apply` in the `production` environment, then [`verify-live.sh`](scripts/verify-live.sh) checks the live site from outside |
+| `drift-check.yml` | Mondays, or by hand | `terraform plan -detailed-exitcode` to catch changes made outside Terraform, and `verify-live.sh` to catch controls that stopped working |
 
 There's no cache purge step: each deploy uploads a new asset manifest, and Workers serves the new files without one. I tested this from outside: a file Cloudflare had cached was replaced on the first request after `terraform apply` finished.
 
@@ -59,21 +60,45 @@ A concurrency group stops two Terraform runs from overlapping, and the state is 
 
 **Terraform state** lives in the R2 bucket `timfletcher-tfstate`, never in the repo. The account endpoint and R2 keys come from environment variables (`AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), so nothing account-specific is committed.
 
+## Checking it from the outside
+
+A green `terraform apply` only proves Cloudflare's API accepted the config. [`scripts/verify-live.sh`](scripts/verify-live.sh) checks what a visitor actually gets, using only public requests:
+
+| Area | Checks |
+|---|---|
+| HTTPS | HTTP redirects to HTTPS; apex and `www` both serve the site |
+| Headers | HSTS (1 year, subdomains), `nosniff`, `X-Frame-Options`, Referrer-Policy, Permissions-Policy, COOP, CORP |
+| CSP | Blocks scripts, framing, `<base>` and form targets; allows no `unsafe-*`, no wildcards and no third-party origins |
+| Other responses | Unknown paths return 404 *with* a CSP; the résumé is a PDF that can't be framed; fonts are cached for a year |
+| security.txt | Served, and fails 30 days before `Expires` so it gets renewed in time |
+| DNS | DNSSEC validates (AD flag from Google's resolver, not Cloudflare's); null MX, SPF `-all`, DMARC `p=reject` |
+
+It runs after every deploy and every Monday, and writes a pass/fail table to the run's summary page. The Monday run also does a `terraform plan -detailed-exitcode`: `main` is always applied, so any planned change means someone or something changed the live config outside Terraform (drift). A failed run sends me a GitHub notification (by email, with default settings). GitHub pauses scheduled workflows after 60 days without a commit, so a quiet repo needs the workflow re-enabled now and then.
+
+The script was tested against a local mock of the site in both directions: everything passes against the correct config, and removing a header, loosening the CSP, breaking the redirect, dropping DNSSEC or letting security.txt near its expiry each fails the right check.
+
+Run it yourself on Linux or WSL:
+
+```bash
+bash scripts/verify-live.sh
+```
+
 ## Security scanning
 
-Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitHub Actions workflows, and the pipeline **fails** on any unaddressed finding. Checkov has no Cloudflare policies yet, so today the workflow checks do most of the work: no write-all permissions, no shell injection, no secrets passed to `curl`.
+Every push runs [Checkov](https://www.checkov.io/) on the Terraform and the GitHub Actions workflows, and [zizmor](https://docs.zizmor.sh/) on the workflows, and the pipeline **fails** on any unaddressed finding. Checkov has no Cloudflare policies yet, so today the workflow checks do most of the work: no write-all permissions, no shell injection, no secrets passed to `curl`. zizmor goes deeper on GitHub Actions specifically: template injection, credentials left in the checkout, impostor commits behind a pinned hash, and Dependabot settings.
 
 **Hardening applied:**
 - **No origin server:** the files are served from Cloudflare's edge, and the `workers.dev` and preview URLs are off, so every request goes through the zone's TLS settings and security headers.
 - **Cloudflare TLS:** Full (strict) SSL, automatic HTTP → HTTPS redirects, TLS 1.2 minimum.
-- **Security headers:** a Cloudflare Transform Rule adds them to every response. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows fonts from Google Fonts. Graded **A+** by securityheaders.com, Mozilla HTTP Observatory (115/100) and SSL Labs. HSTS keeps browsers on HTTPS.
-- **Vulnerability disclosure:** [`/.well-known/security.txt`](https://timfletcher.tech/.well-known/security.txt) (RFC 9116) points researchers to GitHub private vulnerability reporting, so reports reach me without publishing an email address.
+- **Security headers:** a Cloudflare Transform Rule adds them to every response. The Content-Security-Policy blocks all scripts (the site has none) and all inline styles (CSS lives in `site/styles.css`), blocks framing, and only allows styles, fonts and images from the site itself. `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` (both `same-origin`) stop other sites from scripting a window they opened to this one or loading its files.
+- **No third parties:** the fonts are self-hosted in `site/fonts/` instead of loaded from Google Fonts, so a visit sends nothing to anyone but Cloudflare, and there's no outside server that could change what the page loads. The CSP enforces this: it has no allowed domain other than `'self'`. Graded **A+** by securityheaders.com, Mozilla HTTP Observatory (115/100) and SSL Labs. HSTS keeps browsers on HTTPS.
+- **Vulnerability disclosure:** [`/.well-known/security.txt`](https://timfletcher.tech/.well-known/security.txt) (RFC 9116) and [`SECURITY.md`](SECURITY.md) point researchers to GitHub private vulnerability reporting, so reports reach me without publishing an email address.
 - **DNSSEC:** DNS answers are signed, so resolvers can detect forged records for the domain.
 - **Email anti-spoofing:** the domain sends no email, and its DNS says so (null MX, SPF `-all`, DMARC `p=reject`, empty DKIM), so mail servers reject phishing that claims to come from it.
 - **Least-privilege credentials:** the API token can only edit Workers scripts on the account and DNS, zone settings and transform rules on one zone. The R2 token only reaches the state bucket. The GitHub Actions token is read-only (`permissions: contents: read`).
 - **No secrets in Git:** locally, the account ID, zone ID and API token live only in the git-ignored `terraform.tfvars`; in CI they're GitHub Actions secrets, masked in public logs.
 
-**Supply chain:** every GitHub Action is pinned to a full commit hash instead of a version tag, so a compromised or moved tag can't change what runs in the pipeline. Dependabot opens a weekly PR when a new version is released. The Cloudflare provider is pinned in `.terraform.lock.hcl` with its checksums.
+**Supply chain:** every GitHub Action is pinned to a full commit hash instead of a version tag, so a compromised or moved tag can't change what runs in the pipeline. Dependabot opens a weekly PR when a new version is released, but only once that version is a week old, so a malicious release is likely to be caught by someone else first. The Cloudflare provider is pinned in `.terraform.lock.hcl` with its checksums, and every job uses the same pinned Terraform version. Checkouts don't keep the GitHub token in `.git/config` (`persist-credentials: false`), and every job has a timeout so a hung run can't hold the state lock.
 
 **Accepted risk – long-lived Cloudflare tokens.** The Azure version signed in through OIDC, so no Azure secret existed anywhere. The Cloudflare API token and R2 token are stored secrets instead. They're scoped as narrowly as Cloudflare allows, `apply` only runs after approval in the `production` environment, and both tokens should have an expiry date so they get rotated.
 
@@ -161,4 +186,7 @@ The site first ran on Azure Storage behind Cloudflare (see [History](#history)),
 - [x] Azure version: remote state in Azure Storage, OIDC deploys, Entra ID blob uploads, budget alert
 - [x] Security review fixes: email anti-spoofing, security headers (A+), DNSSEC, pinned actions, branch protection
 - [x] Move hosting to Workers static assets and state to R2; remove Azure
+- [x] Self-hosted fonts (first-party-only CSP), COOP/CORP, long cache for fonts
+- [x] zizmor workflow scanning, Dependabot cooldown, no persisted checkout credentials
+- [x] Live control checks after every deploy, plus weekly drift detection
 - [ ] Visitor counter (Workers + D1)
