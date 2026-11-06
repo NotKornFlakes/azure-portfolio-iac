@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Rust Telnet Honeypot · Timothy Fletcher</title>
+<meta name="description" content="A telnet honeypot in Rust that recorded what IoT botnets do after logging in: 2,450 connections, 481 logins, 13 malware download attempts and zero outbound connections.">
+<link rel="canonical" href="https://timfletcher.tech/honeypot/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/inter-4.001-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/jetbrains-mono-2.211-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="/">tim<span>@</span>fletcher:~$</a>
+    <ul>
+      <li><a href="/#projects">Projects</a></li>
+      <li><a href="/#experience">Experience</a></li>
+      <li><a href="/#skills">Skills</a></li>
+      <li><a href="/#writing">Writing</a></li>
+      <li><a href="/#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="wrap" id="top">
+
+  <header class="hero project">
+    <div class="back"><a href="/#projects">← All projects</a></div>
+    <div class="prompt">$ cd ~/projects/rust-telnet-honeypot</div>
+    <h1>Rust Telnet Honeypot</h1>
+    <p class="role"><strong>What IoT botnets do after they log in</strong> · 86 hours on Google Cloud · Nov 3–6, 2026</p>
+    <div class="tags">
+      <span class="tag">Rust</span>
+      <span class="tag">Google Cloud</span>
+      <span class="tag">Terraform</span>
+      <span class="tag">nftables</span>
+      <span class="tag">MITRE ATT&amp;CK</span>
+      <span class="tag">pandas</span>
+      <span class="tag">Plotly</span>
+    </div>
+    <div class="buttons">
+      <a class="btn primary" href="https://github.com/NotKornFlakes/Rust-Honeypot/blob/master/README_REPORT.md" target="_blank" rel="noopener">Read the full report</a>
+      <a class="btn" href="https://github.com/NotKornFlakes/Rust-Honeypot" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg>
+        GitHub repo
+      </a>
+    </div>
+  </header>
+
+  <figure class="figure lead">
+    <picture>
+      <source srcset="/honeypot/1-funnel-light.png" media="(prefers-color-scheme: light)">
+      <img src="/honeypot/1-funnel-dark.png" width="2000" height="840" fetchpriority="high"
+           alt="Funnel chart, Nov 3–6: 2,450 connections; 2,132 sent a login (87%); 481 got into the shell (19.6%); 414 sent a command (16.9%); 165 ran a real-shell check (6.7%); 13 reached a download (0.5%).">
+    </picture>
+    <figcaption>Of 2,450 connections, 481 got into the fake shell and 13 reached a download. The last two steps overlap rather than nest: 4 of the 13 downloads came after a check.</figcaption>
+  </figure>
+
+  <section id="summary">
+    <div class="sec-head"><span class="idx">01</span><h2>In short</h2></div>
+    <ul class="prose">
+      <li><b>What I built:</b> a medium-interaction telnet honeypot in Rust, run on Google Cloud for 86 hours. 18 common factory-default logins get into a shell that's entirely fake. Every reply is fixed text compiled into the program, and nothing a visitor sends is ever run or fetched.</li>
+      <li><b>What I found:</b> 481 of 2,450 connections logged in and sent 1,772 commands, including 13 attempts to download and run malware. None of them produced an outbound connection. Most bots followed the same playbook, mapped below to MITRE ATT&amp;CK.</li>
+      <li><b>What it shows:</b> a fixed-reply shell is safe but easy to spot. Almost every bot that checked for its own marker word left before the payload stage. Silent visitors fell from 82% to 12% after the server began opening with telnet negotiation, but the IP address changed at the same moment, so that cause isn't proven.</li>
+    </ul>
+  </section>
+
+  <section id="playbook">
+    <div class="sec-head"><span class="idx">02</span><h2>The post-login playbook</h2></div>
+    <figure class="figure">
+      <picture>
+        <source srcset="/honeypot/4-playbook-light.png" media="(prefers-color-scheme: light)">
+        <img src="/honeypot/4-playbook-dark.png" width="2000" height="1200" loading="lazy"
+             alt="Bar chart of sessions per playbook step, in attack order, with ATT&amp;CK IDs. The same numbers are in the table below.">
+      </picture>
+      <figcaption>Sessions that took each step. Most sessions took several. 165 of the 414 sessions with commands ran a check that only a real shell passes, and 161 of them stopped there.</figcaption>
+    </figure>
+    <details class="steps">
+      <summary>The playbook as a table</summary>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Step</th><th>MITRE ATT&amp;CK</th><th class="num">Sessions</th><th class="num">IPs</th></tr></thead>
+          <tbody>
+            <tr><td>Log in with factory defaults</td><td><a href="https://attack.mitre.org/techniques/T1110/001/" target="_blank" rel="noopener">T1110.001</a>, <a href="https://attack.mitre.org/techniques/T1078/001/" target="_blank" rel="noopener">T1078.001</a></td><td class="num">481</td><td class="num">152</td></tr>
+            <tr><td>Break out of a router's limited menu</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">299</td><td class="num">92</td></tr>
+            <tr><td>Try a router CLI</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a></td><td class="num">80</td><td class="num">25</td></tr>
+            <tr><td>Inject a shell into a ping tool</td><td><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">64</td><td class="num">48</td></tr>
+            <tr><td>Look around</td><td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener">T1082</a>, <a href="https://attack.mitre.org/techniques/T1087/001/" target="_blank" rel="noopener">T1087.001</a>, <a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener">T1033</a>, <a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">116</td><td class="num">50</td></tr>
+            <tr><td>Find a writable folder, then check with a hex echo</td><td><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">80</td><td class="num">25</td></tr>
+            <tr><td>Check for a real BusyBox</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">29</td><td class="num">11</td></tr>
+            <tr><td>Check that echo works</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">9</td><td class="num">9</td></tr>
+            <tr><td>The <code>SHELL_TEST</code> check</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">47</td><td class="num">3</td></tr>
+            <tr><td>Download and run</td><td><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener">T1105</a>, <a href="https://attack.mitre.org/techniques/T1222/002/" target="_blank" rel="noopener">T1222.002</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">13</td><td class="num">7</td></tr>
+            <tr><td>Remove rival bots</td><td><a href="https://attack.mitre.org/techniques/T1489/" target="_blank" rel="noopener">T1489</a></td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>Clean up</td><td><a href="https://attack.mitre.org/techniques/T1070/004/" target="_blank" rel="noopener">T1070.004</a></td><td class="num">1</td><td class="num">1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">The system-check rows use T1497.001 as the closest fit, as does T1489 for removing rival bots. The IPs column for logging in counts the IPs that got in.</p>
+    </details>
+    <figure class="figure">
+      <picture>
+        <source srcset="/honeypot/6-sessions-ended-light.png" media="(prefers-color-scheme: light)">
+        <img src="/honeypot/6-sessions-ended-dark.png" width="2000" height="460" loading="lazy"
+             alt="Segmented bar: of 481 shell sessions, 289 (60%) hung up and 192 (40%) hit the 30-second limit.">
+      </picture>
+      <figcaption>None of the 481 sessions typed <code>exit</code>. The 192 that hit the limit held a bot for the full 30 seconds.</figcaption>
+    </figure>
+  </section>
+
+  <section id="defenders">
+    <div class="sec-head"><span class="idx">03</span><h2>What defenders should do</h2></div>
+    <ol class="prose">
+      <li><b>Block inbound telnet (23 and 2323) at the edge.</b> 87% of connections here sent a login, and an open telnet port was all any of these bots needed to start.</li>
+      <li><b>Change factory-default logins before a device is deployed.</b> 18 common defaults were enough for 481 logins from 152 IPs in 86 hours.</li>
+      <li><b>Put IoT devices on their own network segment, with outbound traffic restricted to what they need.</b> Every dropper here had to fetch its payload from a raw IP address, over ports 80, 443, 8081 and 9087 or over TFTP. An outbound allow-list would have stopped every download in this data, as this honeypot's own firewalls did.</li>
+      <li><b>Alert on new outbound connections from IoT devices.</b> These devices talk to a small, fixed set of servers, so a connection to an unfamiliar address is worth a look, especially within minutes of an inbound login. The full report has a KQL query that does this from firewall logs.</li>
+    </ol>
+    <figure class="figure">
+      <picture>
+        <source srcset="/honeypot/5-usernames-light.png" media="(prefers-color-scheme: light)">
+        <img src="/honeypot/5-usernames-dark.png" width="2000" height="920" loading="lazy"
+             alt="Bar chart of the usernames tried by the most IPs: root 151, admin 120, default 34, guest 32, support 24, telnetadmin 21, user 17, telecomadmin 16, administrator 12, hikvision 11.">
+      </picture>
+      <figcaption>The usernames bots tried most widely. Passwords aren't shown, and neither are names only one IP tried.</figcaption>
+    </figure>
+  </section>
+
+  <section id="telnet">
+    <div class="sec-head"><span class="idx">04</span><h2>The telnet opening, and its caveat</h2></div>
+    <div class="prose">
+      <p>Before the shell, the honeypot only showed a login prompt, and 82% of visits sent nothing at all. 241 of those silent visits came from 11 IPs with the same rhythm: connect, stay silent for about 8 seconds, hang up and try again. Real devices start telnet negotiation as soon as a client connects, so the shell release does the same. Afterwards, silent visits fell to 12%, and 81% of visits answered the negotiation.</p>
+    </div>
+    <figure class="figure">
+      <picture>
+        <source srcset="/honeypot/3-silent-before-after-light.png" media="(prefers-color-scheme: light)">
+        <img src="/honeypot/3-silent-before-after-dark.png" width="2000" height="880" loading="lazy"
+             alt="Bar chart of silent visits before and after the change: all visits 82% before and 12% after; without the 11 retry IPs, 66% before, and those IPs never came back; the 7 IPs seen in both periods, 40% before and 8% after.">
+      </picture>
+    </figure>
+    <div class="callout">
+      <p><b>The caveat.</b> Turning on the shell meant reinstalling the server, which gave it a new IP address. None of the 11 retry IPs ever found the new address, and only 7 of the 117 IPs from the day before were seen again. Those 7 point the same way, but 7 is too few to prove it, and the baseline is a single day. The opening is the likeliest cause of the drop, but this setup can't separate it from the new address.</p>
+    </div>
+    <figure class="figure">
+      <picture>
+        <source srcset="/honeypot/2-visits-per-hour-light.png" media="(prefers-color-scheme: light)">
+        <img src="/honeypot/2-visits-per-hour-dark.png" width="2000" height="840" loading="lazy"
+             alt="Line chart of visits per hour from Nov 2 to Nov 6, with a line marking the change on Nov 3 at 01:29 UTC, when the telnet opening and fake shell went live on a new IP address.">
+      </picture>
+      <figcaption>Visits per hour, UTC. The vertical line is the change, when the telnet opening and fake shell went live on the new address.</figcaption>
+    </figure>
+  </section>
+
+  <section id="more">
+    <div class="contact">
+      <h2>The full write-up</h2>
+      <p>The report covers the safety design layer by layer, masked examples of every playbook step, the egress results and three detection rules in Sigma and KQL.</p>
+      <div class="buttons">
+        <a class="btn primary" href="https://github.com/NotKornFlakes/Rust-Honeypot/blob/master/README_REPORT.md" target="_blank" rel="noopener">Read the full report</a>
+        <a class="btn" href="https://github.com/NotKornFlakes/Rust-Honeypot" target="_blank" rel="noopener">GitHub repo</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Timothy Fletcher</span>
+    <span>Deployed by GitHub Actions + Terraform on <code>Cloudflare Workers</code> · <a href="https://github.com/NotKornFlakes/portfolio-iac" target="_blank" rel="noopener">view source</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

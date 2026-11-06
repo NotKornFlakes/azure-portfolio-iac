@@ -94,6 +94,19 @@
       </article>
 
       <article class="card">
+        <div class="kicker">Deception &amp; Threat Research</div>
+        <h3>Rust Telnet Honeypot: What IoT Botnets Do After Login</h3>
+        <p>A telnet honeypot in Rust on Google Cloud, with a fake shell that records what bots do after logging in and never runs anything they send.</p>
+        <ul>
+          <li>Recorded <b>2,450 connections from 364 IPs</b> in 86 hours. 481 logins sent 1,772 commands, and 13 malware download attempts made <b>zero outbound connections</b>.</li>
+          <li>Mapped the post-login playbook to <b>MITRE ATT&amp;CK</b>: router-menu escapes, BusyBox checks, writable-folder probes and droppers for several CPU types.</li>
+          <li>Each layer assumes the last one failed: fixed replies the compiler enforces, a noexec systemd sandbox, and outbound traffic denied at both the host and cloud firewalls.</li>
+        </ul>
+        <div class="stack"><span>Rust</span><span>Google Cloud</span><span>Terraform</span><span>nftables</span><span>MITRE ATT&amp;CK</span><span>Plotly</span></div>
+        <div class="links"><a href="/honeypot/">→ Project page</a><a href="https://github.com/NotKornFlakes/Rust-Honeypot" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
         <div class="kicker">SOAR Automation</div>
         <h3>Sentinel SOAR: Automated Brute-Force Response</h3>
         <p>A Logic App playbook that enriches Sentinel incidents with threat intel and blocks high-risk IPs automatically.</p>

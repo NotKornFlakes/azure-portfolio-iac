@@ -198,3 +198,36 @@ footer code { font-family: var(--mono); font-size: 12.5px; color: var(--accent);
 
 /* 404 page */
 .notfound { font-family: system-ui, sans-serif; text-align: center; margin-top: 80px; }
+
+/* Project pages. Charts are images in two versions, swapped by a <picture>
+   media query, so the page needs no script. */
+header.hero.project { padding: 48px 0 32px; }
+.back { font-family: var(--mono); font-size: 13.5px; margin-bottom: 20px; }
+.figure { margin: 0 0 40px; }
+.figure.lead { margin-bottom: 64px; }
+.figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+/* On a phone the chart text would shrink to unreadable, so charts keep a
+   readable width and scroll sideways instead. */
+@media (max-width: 640px) {
+  .figure picture { display: block; overflow-x: auto; }
+  .figure img { width: 760px; max-width: none; }
+}
+.figure figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); max-width: 720px; }
+.prose { max-width: 720px; font-size: 16px; margin: 0 0 28px; }
+.prose li { margin-bottom: 12px; }
+.prose p { margin: 0 0 16px; }
+.prose b { font-weight: 600; }
+.figure code, .prose code, .steps code { font-family: var(--mono); font-size: .9em; }
+.steps { margin: -16px 0 40px; }
+.steps summary { cursor: pointer; font-family: var(--mono); font-size: 14px; color: var(--accent-2); }
+.table-scroll { overflow-x: auto; margin-top: 12px; }
+.steps table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.steps th, .steps td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.steps th { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.steps .num { text-align: right; font-family: var(--mono); white-space: nowrap; }
+.steps .note { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; }
+.callout {
+  background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--warn);
+  border-radius: var(--radius); padding: 18px 22px; margin: 0 0 40px; max-width: 760px;
+}
+.callout p { margin: 0; }
