@@ -66,7 +66,7 @@
     <ul class="prose">
       <li><b>What I built:</b> a medium-interaction telnet honeypot in Rust, run on Google Cloud for 86 hours. 18 common factory-default logins get into a shell that's entirely fake. Every reply is fixed text compiled into the program, and nothing a visitor sends is ever run or fetched.</li>
       <li><b>What I found:</b> 481 of 2,450 connections logged in and sent 1,772 commands, including 13 attempts to download and run malware. None of them produced an outbound connection. Most bots followed the same playbook, mapped below to MITRE ATT&amp;CK.</li>
-      <li><b>What it shows:</b> a fixed-reply shell is safe but easy to spot. Almost every bot that checked for its own marker word left before the payload stage. Silent visitors fell from 82% to 12% after the server began opening with telnet negotiation, but the IP address changed at the same moment, so that cause isn't proven.</li>
+      <li><b>What it shows:</b> a fixed-reply shell is safe but easy to spot. Almost every bot that checked for its own marker word left before the payload stage. Silent visitors fell from 82% to 12% after the server began opening with telnet negotiation. The IP address stayed the same, but almost none of the earlier visitors came back and the baseline is one day, so that cause isn't proven.</li>
     </ul>
   </section>
 
@@ -144,15 +144,15 @@
       </picture>
     </figure>
     <div class="callout">
-      <p><b>The caveat.</b> Turning on the shell meant reinstalling the server, which gave it a new IP address. None of the 11 retry IPs ever found the new address, and only 7 of the 117 IPs from the day before were seen again. Those 7 point the same way, but 7 is too few to prove it, and the baseline is a single day. The opening is the likeliest cause of the drop, but this setup can't separate it from the new address.</p>
+      <p><b>The caveat.</b> Turning on the shell meant reinstalling the server, but it kept the same IP address, so a change of address doesn't explain the drop. The visitors did change: only 7 of the 117 IPs from the day before were seen again. Those 7 went from 40% to 8% silent, which points the same way, but 7 is too few to prove it, and the baseline is a single day. The 11 retry IPs never came back to the same address, so for the bots that prompted the change, it's untested. The opening is the likeliest cause of the drop, but this setup can't rule out the change in visitors.</p>
     </div>
     <figure class="figure">
       <picture>
         <source srcset="/honeypot/2-visits-per-hour-light.png" media="(prefers-color-scheme: light)">
         <img src="/honeypot/2-visits-per-hour-dark.png" width="2000" height="840" loading="lazy"
-             alt="Line chart of visits per hour from Nov 2 to Nov 6, with a line marking the change on Nov 3 at 01:29 UTC, when the telnet opening and fake shell went live on a new IP address.">
+             alt="Line chart of visits per hour from Nov 2 to Nov 6, with a line marking the change on Nov 3 at 01:29 UTC, when the telnet opening and fake shell went live.">
       </picture>
-      <figcaption>Visits per hour, UTC. The vertical line is the change, when the telnet opening and fake shell went live on the new address.</figcaption>
+      <figcaption>Visits per hour, UTC. The vertical line is the change, when the telnet opening and fake shell went live.</figcaption>
     </figure>
   </section>
 
