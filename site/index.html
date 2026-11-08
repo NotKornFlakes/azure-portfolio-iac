@@ -111,7 +111,7 @@
         <h3>Playbook Defense: Honeypot Findings as Alerts, Allowlist and Trap</h3>
         <p>16 Sigma rules mapped to each step of the IoT botnet playbook (MITRE ATT&amp;CK), a GCP firewall allowlist in Terraform, and an internal NAS decoy where any connection is an alert.</p>
         <ul>
-          <li>Wrote <b>16 Sigma rules</b>, one or more for every step from default-password login to cleanup. All 16 parse and convert to Splunk searches with sigma-cli.</li>
+          <li>Wrote <b>16 Sigma rules</b>, one or more for every step from default-password login to cleanup. CI checks every rule against MITRE ATT&amp;CK and converts them to Splunk searches, and validates the Terraform, on every push.</li>
           <li>Admin ports answer only allowlisted addresses such as the VPN and Identity-Aware Proxy, telnet is denied to everyone by default, and IoT devices can reach only approved servers. One file feeds both the firewall and the alerts, so they never disagree.</li>
           <li>The NAS decoy runs the honeypot's fake shell with no public IP. Nothing legitimate touches it, so any connection is a <b>high-confidence alert</b>.</li>
         </ul>
