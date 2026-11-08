@@ -71,27 +71,14 @@
 
   <div class="metrics" aria-label="Project highlights">
     <div class="metric"><div class="num">1.24M</div><div class="lbl">attack attempts captured by my honeypots in 37 hours</div></div>
-    <div class="metric"><div class="num">~12s</div><div class="lbl">automated triage vs. 10–15 min manual</div></div>
+    <div class="metric"><div class="num">0</div><div class="lbl">outbound connections from 481 bot logins on my Rust honeypot</div></div>
+    <div class="metric"><div class="num">16</div><div class="lbl">open-source Sigma rules, one or more for every playbook step</div></div>
     <div class="metric"><div class="num">91%</div><div class="lbl">alert noise cut (65 alerts → 6 incidents)</div></div>
-    <div class="metric"><div class="num">13</div><div class="lbl">MITRE ATT&amp;CK techniques mapped from a live intrusion</div></div>
   </div>
 
   <section id="projects">
     <div class="sec-head"><span class="idx">01</span><h2>Security Projects</h2></div>
     <div class="projects">
-
-      <article class="card">
-        <div class="kicker">Detection &amp; Response</div>
-        <h3>SOC Home Lab: Azure Honeypots + Sentinel</h3>
-        <p>Three internet-facing honeypots feeding Microsoft Sentinel, used to write and test real detections against real attackers.</p>
-        <ul>
-          <li>Deployed Windows RDP, Cowrie SSH and Endlessh honeypots with Azure Monitor Agent and custom log tables; captured <b>1.24M attempts from 75 IPs</b> with zero compromises.</li>
-          <li>Wrote 5 KQL analytics rules (password spray, brute-force-then-success) and rebuilt the low-and-slow rule after v1 missed an attacker guessing once every 12 minutes.</li>
-          <li>Reconstructed an SSH intrusion chain, mapped <b>13 ATT&amp;CK techniques</b>, and identified Panchan, Mirai and Bashlite samples by hash.</li>
-        </ul>
-        <div class="stack"><span>Sentinel</span><span>KQL</span><span>Azure Monitor</span><span>Cowrie</span><span>MITRE ATT&amp;CK</span><span>D3</span></div>
-        <div class="links"><a href="https://github.com/NotKornFlakes/SocHomelab" target="_blank" rel="noopener">→ GitHub</a></div>
-      </article>
 
       <article class="card">
         <div class="kicker">Deception &amp; Threat Research</div>
@@ -117,6 +104,19 @@
         </ul>
         <div class="stack"><span>Sigma</span><span>Terraform</span><span>GCP</span><span>Detection Engineering</span><span>Deception</span></div>
         <div class="links"><a href="/playbook-defense/">→ Project page</a><a href="https://github.com/NotKornFlakes/playbook-defense" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
+        <div class="kicker">Detection &amp; Response</div>
+        <h3>SOC Home Lab: Azure Honeypots + Sentinel</h3>
+        <p>Three internet-facing honeypots feeding Microsoft Sentinel, used to write and test real detections against real attackers.</p>
+        <ul>
+          <li>Deployed Windows RDP, Cowrie SSH and Endlessh honeypots with Azure Monitor Agent and custom log tables; captured <b>1.24M attempts from 75 IPs</b> with zero compromises.</li>
+          <li>Wrote 5 KQL analytics rules (password spray, brute-force-then-success) and rebuilt the low-and-slow rule after v1 missed an attacker guessing once every 12 minutes.</li>
+          <li>Reconstructed an SSH intrusion chain, mapped <b>13 ATT&amp;CK techniques</b>, and identified Panchan, Mirai and Bashlite samples by hash.</li>
+        </ul>
+        <div class="stack"><span>Sentinel</span><span>KQL</span><span>Azure Monitor</span><span>Cowrie</span><span>MITRE ATT&amp;CK</span><span>D3</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/SocHomelab" target="_blank" rel="noopener">→ GitHub</a></div>
       </article>
 
       <article class="card">
@@ -270,7 +270,7 @@
   <section id="contact">
     <div class="contact">
       <h2>Let's talk</h2>
-      <p>I'm looking for security analyst roles, especially with MSPs and MSSPs that protect small law, finance and healthcare offices. I'm based in Syracuse, NY, and open to remote work.</p>
+      <p>I'm looking for my first role in security operations, where I can keep building simple, open-source defenses. I'm based in Syracuse, NY, and open to remote work.</p>
       <div class="buttons">
         <a class="btn primary" href="https://www.linkedin.com/in/timcfletch" target="_blank" rel="noopener">Message me on LinkedIn</a>
         <a class="btn" href="resume.pdf" target="_blank" rel="noopener">Download résumé</a>
