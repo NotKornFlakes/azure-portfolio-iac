@@ -231,3 +231,39 @@ header.hero.project { padding: 48px 0 32px; }
   border-radius: var(--radius); padding: 18px 22px; margin: 0 0 40px; max-width: 760px;
 }
 .callout p { margin: 0; }
+
+/* Playbook Defense page: the network diagram is inline SVG, coloured here
+   rather than with inline styles, so it follows the theme and the CSP. */
+.diagram-scroll {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px; overflow-x: auto;
+}
+.flow { display: block; width: 100%; height: auto; min-width: 720px; font-family: var(--sans); }
+.flow text { fill: var(--text); font-size: 15px; font-weight: 600; }
+.flow .sub { fill: var(--muted); font-family: var(--mono); font-size: 12.5px; font-weight: 400; }
+.flow .label { fill: var(--muted); font-family: var(--mono); font-size: 13px; font-weight: 400; }
+.flow .code { font-family: var(--mono); font-size: 14px; fill: var(--accent); }
+.flow .box { fill: var(--bg-2); stroke: var(--line); stroke-width: 1.5; }
+.flow .box.decoy { stroke: var(--warn); stroke-width: 2; }
+.flow .zone { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.flow .wall { stroke: var(--accent-2); stroke-width: 5; stroke-linecap: round; }
+.flow .ok { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.flow .bad { fill: none; stroke: var(--warn); stroke-width: 2.5; stroke-dasharray: 7 5; }
+.flow .x { fill: none; stroke: var(--warn); stroke-width: 3.5; stroke-linecap: round; }
+.flow .flowline, .flow .feed { fill: none; stroke: var(--muted); stroke-width: 2; }
+.flow .feed { stroke-dasharray: 3 4; }
+.flow .head-ok { fill: var(--accent); }
+.flow .head-bad { fill: var(--warn); }
+.flow .head-flow { fill: var(--muted); }
+.flow .mk circle { fill: var(--accent-2); }
+.flow .mk text { fill: var(--bg); font-family: var(--mono); font-size: 13px; font-weight: 700; }
+.steps-table { margin: 0 0 12px; }
+.steps-table table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px; }
+.steps-table th, .steps-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.steps-table th { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.steps-table code { font-family: var(--mono); font-size: .9em; }
+.steps-table tr.extra td { background: var(--bg-2); }
+.lvl { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.lvl.high { color: var(--accent-2); }
+.lvl.crit { color: var(--warn); font-weight: 600; }
+.table-note { font-size: 13.5px; color: var(--muted); margin: 0 0 40px; max-width: 720px; }
