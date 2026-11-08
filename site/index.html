@@ -103,7 +103,20 @@
           <li>Each layer assumes the last one failed: fixed replies the compiler enforces, a noexec systemd sandbox, and outbound traffic denied at both the host and cloud firewalls.</li>
         </ul>
         <div class="stack"><span>Rust</span><span>Google Cloud</span><span>Terraform</span><span>nftables</span><span>MITRE ATT&amp;CK</span><span>Plotly</span></div>
-        <div class="links"><a href="/honeypot/">→ Project page</a><a href="https://github.com/NotKornFlakes/Rust-Honeypot" target="_blank" rel="noopener">→ GitHub</a></div>
+        <div class="links"><a href="/honeypot/">→ Project page</a><a href="https://github.com/NotKornFlakes/rust-telnet-sensor" target="_blank" rel="noopener">→ GitHub</a></div>
+      </article>
+
+      <article class="card">
+        <div class="kicker">Detection Engineering</div>
+        <h3>Playbook Defense: Honeypot Findings as Alerts, Allowlist and Trap</h3>
+        <p>16 Sigma rules mapped to each step of the IoT botnet playbook (MITRE ATT&amp;CK), a GCP firewall allowlist in Terraform, and an internal NAS decoy where any connection is an alert.</p>
+        <ul>
+          <li>Wrote <b>16 Sigma rules</b>, one or more for every step from default-password login to cleanup. CI checks every rule against MITRE ATT&amp;CK and converts them to Splunk searches, and validates the Terraform, on every push.</li>
+          <li>Admin ports answer only allowlisted addresses such as the VPN and Identity-Aware Proxy, telnet is denied to everyone by default, and IoT devices can reach only approved servers. One file feeds both the firewall and the alerts, so they never disagree.</li>
+          <li>The NAS decoy runs the honeypot's fake shell with no public IP. Nothing legitimate touches it, so any connection is a <b>high-confidence alert</b>.</li>
+        </ul>
+        <div class="stack"><span>Sigma</span><span>Terraform</span><span>GCP</span><span>Detection Engineering</span><span>Deception</span></div>
+        <div class="links"><a href="https://github.com/NotKornFlakes/playbook-defense" target="_blank" rel="noopener">→ GitHub</a></div>
       </article>
 
       <article class="card">
