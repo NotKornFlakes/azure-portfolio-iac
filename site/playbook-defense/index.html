@@ -148,7 +148,7 @@
       <figcaption>The numbers match the list below. Every arrow that crosses a firewall writes a log entry, and those log entries are what the alerts read.</figcaption>
     </figure>
     <ol class="prose">
-      <li><b>Bots stop at the edge.</b> Admin ports (SSH, RDP, VNC and device web pages) only answer the VPN, static office addresses and Google's Identity-Aware Proxy. Telnet, the door every bot on the honeypot came through, is closed to everyone, the allowlist included.</li>
+      <li><b>Bots stop at the edge.</b> Admin ports (SSH, RDP, VNC and device web pages) only answer the VPN, static office addresses and Google's Identity-Aware Proxy. Telnet, the door every bot on the honeypot came through, is closed to everyone by default, the allowlist included.</li>
       <li><b>Approved people still get in.</b> One door, preferably the VPN. Losing a laptop means revoking one VPN account, not editing the firewall.</li>
       <li><b>IoT devices can't call out.</b> Every dropper the honeypot saw fetched its payload from a raw IP address on the internet. IoT devices may only reach the few servers they need, so that download fails, and the blocked attempt is an alert.</li>
       <li><b>Anything that touches the decoy is an alert.</b> The NAS decoy sits inside the network with an ordinary server name. Nothing legitimate uses it, so a connection means someone inside is exploring: a compromised device, a bot past the edge, or a person who shouldn't be there.</li>
