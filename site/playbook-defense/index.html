@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Playbook Defense · Timothy Fletcher</title>
+<meta name="description" content="Turning a honeypot's findings into defense: 16 Sigma rules mapped to every step of the IoT botnet playbook, a GCP firewall allowlist in Terraform, and an internal NAS decoy where any connection is an alert.">
+<link rel="canonical" href="https://timfletcher.tech/playbook-defense/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/inter-4.001-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/jetbrains-mono-2.211-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="/">tim<span>@</span>fletcher:~$</a>
+    <ul>
+      <li><a href="/#projects">Projects</a></li>
+      <li><a href="/#experience">Experience</a></li>
+      <li><a href="/#skills">Skills</a></li>
+      <li><a href="/#writing">Writing</a></li>
+      <li><a href="/#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="wrap" id="top">
+
+  <header class="hero project">
+    <div class="back"><a href="/#projects">← All projects</a></div>
+    <div class="prompt">$ cd ~/projects/playbook-defense</div>
+    <h1>Playbook Defense</h1>
+    <p class="role"><strong>Honeypot findings, turned into alerts, an allowlist and a trap</strong> · Sigma and Terraform on Google Cloud · Nov 2026</p>
+    <div class="tags">
+      <span class="tag">Sigma</span>
+      <span class="tag">Terraform</span>
+      <span class="tag">Google Cloud</span>
+      <span class="tag">MITRE ATT&amp;CK</span>
+      <span class="tag">Detection Engineering</span>
+      <span class="tag">Deception</span>
+      <span class="tag">GitHub Actions</span>
+    </div>
+    <div class="buttons">
+      <a class="btn primary" href="https://github.com/NotKornFlakes/playbook-defense" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg>
+        GitHub repo
+      </a>
+      <a class="btn" href="/honeypot/">The honeypot research</a>
+    </div>
+  </header>
+
+  <div class="metrics">
+    <div class="metric"><div class="num">16</div><div class="lbl">Sigma rules, checked against ATT&amp;CK in CI</div></div>
+    <div class="metric"><div class="num">12/12</div><div class="lbl">playbook steps with at least one alert</div></div>
+    <div class="metric"><div class="num">1</div><div class="lbl">file feeds both the firewall and the alerts</div></div>
+    <div class="metric"><div class="num">12</div><div class="lbl">NAS ports on the decoy's tripwire</div></div>
+  </div>
+
+  <section id="summary">
+    <div class="sec-head"><span class="idx">01</span><h2>In short</h2></div>
+    <ul class="prose">
+      <li><b>Where it starts:</b> the <a href="/honeypot/">Rust telnet honeypot</a> recorded 481 bot logins and the steps they took afterwards, from default passwords to malware downloads. Its report ends with what defenders should do. This project does it.</li>
+      <li><b>What I built:</b> 16 Sigma alert rules, one or more for every step of that playbook; Google Cloud firewall rules in Terraform that only let approved addresses reach admin ports and only let IoT devices reach the servers they need; and an internal decoy NAS, running the honeypot's own fake shell, that no real person or system ever uses.</li>
+      <li><b>Why it holds together:</b> a single file, <code>allowlist.yaml</code>, lists who is allowed in, where IoT devices may go and where the decoy lives. Terraform builds the firewall from it, and a script writes the same addresses into the alert rules, so the firewall and the alerts can't drift apart.</li>
+    </ul>
+  </section>
+
+  <section id="layers">
+    <div class="sec-head"><span class="idx">02</span><h2>Three layers</h2></div>
+    <figure class="figure diagram">
+      <div class="diagram-scroll">
+        <svg class="flow" viewBox="0 0 960 484" role="img" aria-labelledby="flow-title flow-desc">
+          <title id="flow-title">How the three layers fit together</title>
+          <desc id="flow-desc">Bots on the internet are stopped at the edge allowlist, while the VPN, office and Identity-Aware Proxy reach the company's servers. IoT devices can't connect out except to approved servers. Inside the network, any connection to the NAS decoy is an alert. All three write firewall logs, which the Sigma rules turn into alerts, and one allowlist file feeds both the firewall and the rules.</desc>
+          <defs>
+            <marker id="arrow-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-ok" d="M0 0 10 5 0 10z"/></marker>
+            <marker id="arrow-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-bad" d="M0 0 10 5 0 10z"/></marker>
+            <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-flow" d="M0 0 10 5 0 10z"/></marker>
+          </defs>
+
+          <!-- Outside -->
+          <rect class="box" x="20" y="60" width="160" height="96" rx="10"/>
+          <text x="100" y="100" text-anchor="middle">Internet</text>
+          <text class="sub" x="100" y="124" text-anchor="middle">bots · scanners</text>
+
+          <rect class="box" x="20" y="222" width="160" height="96" rx="10"/>
+          <text x="100" y="262" text-anchor="middle">Approved</text>
+          <text class="sub" x="100" y="286" text-anchor="middle">VPN · office · IAP</text>
+
+          <!-- Edge allowlist -->
+          <text class="label" x="232" y="30" text-anchor="middle">edge allowlist</text>
+          <line class="wall" x1="232" y1="44" x2="232" y2="352"/>
+
+          <!-- Company network -->
+          <rect class="zone" x="272" y="44" width="668" height="308" rx="14"/>
+          <text class="label" x="292" y="72">company network · GCP VPC</text>
+
+          <rect class="box" x="300" y="92" width="190" height="72" rx="10"/>
+          <text x="395" y="124" text-anchor="middle">Servers</text>
+          <text class="sub" x="395" y="146" text-anchor="middle">tag: managed</text>
+
+          <rect class="box" x="300" y="252" width="190" height="80" rx="10"/>
+          <text x="395" y="286" text-anchor="middle">IoT segment</text>
+          <text class="sub" x="395" y="310" text-anchor="middle">cameras · DVRs · routers</text>
+
+          <rect class="box decoy" x="712" y="150" width="200" height="96" rx="10"/>
+          <text x="812" y="190" text-anchor="middle">nas-backup-01</text>
+          <text class="sub" x="812" y="214" text-anchor="middle">NAS decoy · no public IP</text>
+
+          <!-- 1: bots stopped at the edge -->
+          <line class="bad" x1="180" y1="108" x2="226" y2="108" marker-end="url(#arrow-bad)"/>
+          <path class="x" d="M224 100 240 116 M240 100 224 116"/>
+          <!-- 2: approved addresses reach the servers -->
+          <path class="ok" d="M180 270 H258 V128 H296" marker-end="url(#arrow-ok)"/>
+          <!-- 3: IoT can't connect out -->
+          <path class="bad" d="M300 316 H240" marker-end="url(#arrow-bad)"/>
+          <path class="x" d="M224 308 240 324 M240 308 224 324"/>
+          <!-- 4: anything touching the decoy -->
+          <path class="bad" d="M490 292 H620 V198 H708" marker-end="url(#arrow-bad)"/>
+
+          <g class="mk"><circle cx="203" cy="86" r="12"/><text x="203" y="91" text-anchor="middle">1</text></g>
+          <g class="mk"><circle cx="210" cy="248" r="12"/><text x="210" y="253" text-anchor="middle">2</text></g>
+          <g class="mk"><circle cx="270" cy="340" r="12"/><text x="270" y="345" text-anchor="middle">3</text></g>
+          <g class="mk"><circle cx="642" cy="178" r="12"/><text x="642" y="183" text-anchor="middle">4</text></g>
+
+          <!-- Detection pipeline -->
+          <rect class="box" x="20" y="384" width="160" height="60" rx="10"/>
+          <text class="code" x="100" y="419" text-anchor="middle">allowlist.yaml</text>
+
+          <rect class="box" x="300" y="384" width="190" height="60" rx="10"/>
+          <text x="395" y="419" text-anchor="middle">VPC firewall logs</text>
+          <rect class="box" x="520" y="384" width="180" height="60" rx="10"/>
+          <text x="610" y="419" text-anchor="middle">16 Sigma rules</text>
+          <rect class="box" x="730" y="384" width="182" height="60" rx="10"/>
+          <text x="821" y="419" text-anchor="middle">SIEM alerts</text>
+
+          <line class="flowline" x1="395" y1="352" x2="395" y2="380" marker-end="url(#arrow-flow)"/>
+          <line class="flowline" x1="490" y1="414" x2="516" y2="414" marker-end="url(#arrow-flow)"/>
+          <line class="flowline" x1="700" y1="414" x2="726" y2="414" marker-end="url(#arrow-flow)"/>
+          <path class="feed" d="M180 414 H232 V356" marker-end="url(#arrow-flow)"/>
+          <path class="feed" d="M100 444 V470 H610 V448" marker-end="url(#arrow-flow)"/>
+          <text class="sub" x="250" y="461">same addresses, both places</text>
+        </svg>
+      </div>
+      <figcaption>The numbers match the list below. Every arrow that crosses a firewall writes a log entry, and those log entries are what the alerts read.</figcaption>
+    </figure>
+    <ol class="prose">
+      <li><b>Bots stop at the edge.</b> Admin ports (SSH, RDP, VNC and device web pages) only answer the VPN, static office addresses and Google's Identity-Aware Proxy. Telnet, the door every bot on the honeypot came through, is closed to everyone, the allowlist included.</li>
+      <li><b>Approved people still get in.</b> One door, preferably the VPN. Losing a laptop means revoking one VPN account, not editing the firewall.</li>
+      <li><b>IoT devices can't call out.</b> Every dropper the honeypot saw fetched its payload from a raw IP address on the internet. IoT devices may only reach the few servers they need, so that download fails, and the blocked attempt is an alert.</li>
+      <li><b>Anything that touches the decoy is an alert.</b> The NAS decoy sits inside the network with an ordinary server name. Nothing legitimate uses it, so a connection means someone inside is exploring: a compromised device, a bot past the edge, or a person who shouldn't be there.</li>
+    </ol>
+  </section>
+
+  <section id="alerts">
+    <div class="sec-head"><span class="idx">03</span><h2>Every playbook step, as an alert</h2></div>
+    <div class="prose">
+      <p>The honeypot recorded the same playbook again and again. Each step became at least one rule, written in Sigma so it converts to Splunk, Sentinel, Elastic and other SIEMs. Rules that read firewall logs work everywhere; the rest need process or login logs from the device itself, which many IoT devices can't provide.</p>
+    </div>
+    <div class="table-scroll steps-table">
+      <table>
+        <thead><tr><th>Playbook step</th><th>MITRE ATT&amp;CK</th><th>Rule</th><th>Reads</th><th>Level</th></tr></thead>
+        <tbody>
+          <tr><td>Log in with factory defaults</td><td><a href="https://attack.mitre.org/techniques/T1110/001/" target="_blank" rel="noopener">T1110.001</a>, <a href="https://attack.mitre.org/techniques/T1078/001/" target="_blank" rel="noopener">T1078.001</a></td><td>Telnet or admin port from outside the allowlist; login as root, admin, guest…</td><td>Firewall, login</td><td><span class="lvl high">high</span></td></tr>
+          <tr><td>Break out of a router's limited menu</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td>Shell started under telnetd or login</td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
+          <tr><td>Try a router CLI</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a></td><td>Shell started under telnetd or login</td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
+          <tr><td>Inject a shell into a ping tool</td><td><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td>Shell syntax in a ping or diagnostics request</td><td>Web server</td><td><span class="lvl high">high</span></td></tr>
+          <tr><td>Look around</td><td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener">T1082</a>, <a href="https://attack.mitre.org/techniques/T1087/001/" target="_blank" rel="noopener">T1087.001</a>, <a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener">T1033</a>, <a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td>CPU, mount and user checks</td><td>Processes</td><td><span class="lvl">low</span></td></tr>
+          <tr><td>Find a writable folder, then check with a hex echo</td><td><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td>Mount checks, and <code>echo -e</code> with hex</td><td>Processes</td><td><span class="lvl high">high</span></td></tr>
+          <tr><td>Check for a real BusyBox</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td>BusyBox with a made-up applet name</td><td>Processes</td><td><span class="lvl high">high</span></td></tr>
+          <tr><td>Check that echo works</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td>Shell-check commands people don't type</td><td>Processes</td><td><span class="lvl high">high</span></td></tr>
+          <tr><td>The <code>SHELL_TEST</code> check</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td><code>SHELL_TEST</code> anywhere in a command</td><td>Processes</td><td><span class="lvl high">high</span></td></tr>
+          <tr><td>Download and run</td><td><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener">T1105</a>, <a href="https://attack.mitre.org/techniques/T1222/002/" target="_blank" rel="noopener">T1222.002</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td>Download from a raw IP; IoT device calling out, critical on dropper ports</td><td>Processes, firewall</td><td><span class="lvl crit">critical</span></td></tr>
+          <tr><td>Remove rival bots</td><td><a href="https://attack.mitre.org/techniques/T1489/" target="_blank" rel="noopener">T1489</a></td><td><code>kill -9</code> aimed at other malware</td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
+          <tr><td>Clean up</td><td><a href="https://attack.mitre.org/techniques/T1070/004/" target="_blank" rel="noopener">T1070.004</a></td><td>Dropped file or shell history deleted</td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
+          <tr class="extra"><td>The whole playbook</td><td>—</td><td>Telnet from outside, then the same device calls out within 10 minutes</td><td>Firewall</td><td><span class="lvl crit">critical</span></td></tr>
+          <tr class="extra"><td>The trap</td><td>—</td><td>Any connection to the decoy; a login attempt on it; the decoy trying to connect out</td><td>Firewall</td><td><span class="lvl crit">critical</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">The step names and ATT&amp;CK IDs are the same as on the <a href="/honeypot/#playbook">honeypot page</a>. The last two rows go beyond a single step. Each rule's file is in the repo's <a href="https://github.com/NotKornFlakes/playbook-defense/tree/master/rules" target="_blank" rel="noopener">rules folder</a>.</p>
+  </section>
+
+  <section id="trap">
+    <div class="sec-head"><span class="idx">04</span><h2>The trap</h2></div>
+    <ul class="prose">
+      <li><b>It's the honeypot, moved inside.</b> The decoy runs the same Rust fake shell, with the same safety design: every reply is fixed text, and nothing a visitor sends is ever run. What changes is where it sits and what it's called. It has no public IP, an ordinary NAS hostname, and a bland network tag.</li>
+      <li><b>Twelve NAS ports, one that answers.</b> Only telnet answers, with the fake shell. FTP, SMB, AFP, NFS, rsync and the usual NAS admin pages have nothing behind them, but the cloud firewall still logs every attempt to reach them, and that's all an alert needs.</li>
+      <li><b>It can't become a foothold.</b> The decoy can't start a connection: outbound traffic is denied by the cloud firewall and again by nftables on the host. If it ever tries, that's its own critical alert, and the answer is to shut it down.</li>
+    </ul>
+    <div class="callout">
+      <p><b>Why this is worth having.</b> The allowlist and the IoT rules stop bots at the door. The decoy catches what got past it. Because nothing legitimate ever connects to it, its alerts have almost no false positives, which is rare for detection inside a network. The one exception is an approved vulnerability scanner, and the allowlist file has a place to exclude those.</p>
+    </div>
+  </section>
+
+  <section id="tested">
+    <div class="sec-head"><span class="idx">05</span><h2>What's tested, and what isn't</h2></div>
+    <ul class="prose">
+      <li><b>Tested on every push.</b> GitHub Actions checks every rule, including its ATT&amp;CK tags, and fails the build on any issue. It then converts all 16 rules to Splunk searches and validates the Terraform. While building it, that check caught two real problems: tags that a newer ATT&amp;CK release had renamed, and a correlation rule that was silently swallowing two of the rules it was built from.</li>
+      <li><b>Not tested yet.</b> It hasn't been deployed to a real company network. The rules have been converted, not run against live logs, and the Terraform has been validated, not applied. The repo ships with placeholder addresses, and its README lists the checks to run once the real ones are filled in.</li>
+    </ul>
+  </section>
+
+  <section id="more">
+    <div class="contact">
+      <h2>The code</h2>
+      <p>The rules, the Terraform, the allowlist script and a step-by-step README, including how to keep the trap a trap.</p>
+      <div class="buttons">
+        <a class="btn primary" href="https://github.com/NotKornFlakes/playbook-defense" target="_blank" rel="noopener">GitHub repo</a>
+        <a class="btn" href="/honeypot/">The honeypot research</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Timothy Fletcher</span>
+    <span>Deployed by GitHub Actions + Terraform on <code>Cloudflare Workers</code> · <a href="https://github.com/NotKornFlakes/portfolio-iac" target="_blank" rel="noopener">view source</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
