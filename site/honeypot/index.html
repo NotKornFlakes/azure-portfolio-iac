@@ -113,13 +113,22 @@
     </figure>
   </section>
 
+  <section id="threat-intel">
+    <div class="sec-head"><span class="idx">03</span><h2>Were these IPs already known?</h2></div>
+    <ul class="prose">
+      <li><b>Almost all were already reported.</b> On Nov 7, I checked all 478 IPs that visited from Nov 2 to Nov 6 against AbuseIPDB, sending only the addresses. 472 had reports from the past year, at least 417 of them from before the honeypot first saw them, and the other 6 had none in the past year.</li>
+      <li><b>New attackers were reported fast.</b> 3 of the 7 IPs that tried a download had no reports until after they reached the honeypot. Within three days of their first report, they had 1,055 to 5,343 each.</li>
+    </ul>
+  </section>
+
   <section id="defenders">
-    <div class="sec-head"><span class="idx">03</span><h2>What defenders should do</h2></div>
+    <div class="sec-head"><span class="idx">04</span><h2>What defenders should do</h2></div>
     <ol class="prose">
       <li><b>Block inbound telnet (23 and 2323) at the edge.</b> 87% of connections here sent a login, and an open telnet port was all any of these bots needed to start.</li>
       <li><b>Change factory-default logins before a device is deployed.</b> 18 common defaults were enough for 481 logins from 152 IPs in 86 hours.</li>
       <li><b>Put IoT devices on their own network segment, with outbound traffic restricted to what they need.</b> Every dropper here had to fetch its payload from a raw IP address, over ports 80, 443, 8081 and 9087 or over TFTP. An outbound allow-list would have stopped every download in this data, as this honeypot's own firewalls did.</li>
       <li><b>Alert on new outbound connections from IoT devices.</b> These devices talk to a small, fixed set of servers, so a connection to an unfamiliar address is worth a look, especially within minutes of an inbound login. The full report has a KQL query that does this from firewall logs.</li>
+      <li><b>Use IP reputation blocklists, but as one layer, not the defense.</b> By Nov 7, 301 of the 478 IPs (63%) scored 75 or above. On the day they arrived, fewer would have: at least 23 of those 301 had no reports until after they reached the honeypot. They include all 7 IPs behind the bots that kept coming back from one to three IPs, which score 100 now. A blocklist only knows yesterday's attackers, so it adds to steps 1 to 4 rather than replacing them.</li>
     </ol>
     <figure class="figure">
       <picture>
@@ -132,7 +141,7 @@
   </section>
 
   <section id="telnet">
-    <div class="sec-head"><span class="idx">04</span><h2>The telnet opening, and its caveat</h2></div>
+    <div class="sec-head"><span class="idx">05</span><h2>The telnet opening, and its caveat</h2></div>
     <div class="prose">
       <p>Before the shell, the honeypot only showed a login prompt, and 82% of visits sent nothing at all. 241 of those silent visits came from 11 IPs with the same rhythm: connect, stay silent for about 8 seconds, hang up and try again. Real devices start telnet negotiation as soon as a client connects, so the shell release does the same. Afterwards, silent visits fell to 12%, and 81% of visits answered the negotiation.</p>
     </div>
