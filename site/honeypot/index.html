@@ -180,7 +180,7 @@
           <tr><td>Download attempts</td><td>10 sessions from 6 IPs, naming 11 different addresses, 10 of them new</td></tr>
           <tr><td>Campaigns never seen before</td><td>13 of 24, in 60 sessions from 14 IPs</td></tr>
           <tr><td>Outbound connections made by the honeypot</td><td><b>0</b></td></tr>
-          <tr><td>Reported to AbuseIPDB</td><td>49 IPs on Nov 8 and 103 on Nov 10</td></tr>
+          <tr><td>Reported to AbuseIPDB</td><td>49 IPs on Nov 8 and 121 on Nov 10</td></tr>
         </tbody>
       </table>
     </div>
@@ -190,7 +190,7 @@
       <li><b>New download URLs, masked:</b> <code>hxxp://176[.]65[.]x[.]x/telnet2.sh</code>, <code>hxxp://160[.]187[.]x[.]x/all.sh</code>, <code>hxxp://37[.]221[.]x[.]x/all.sh</code>, <code>hxxp://102[.]220[.]x[.]x/curl.sh</code> and <code>hxxp://102[.]220[.]x[.]x/wget.sh</code>. With one server named only for TFTP or FTP, that's 10 new addresses on 5 new servers. 6 of the 10 download sessions also tried FTP (<code>busybox ftpget</code>), which no session did from Nov 3 to Nov 6.</li>
       <li><b>Outbound: still 0.</b> The host firewall logged no blocked outbound connection and the cloud firewall's egress log had no hits, though bots sent 66 download addresses to the shell.</li>
       <li><b>Detection fixes.</b> The report's BusyBox rule missed a random word that starts with a lower-case letter, and its download rule missed <code>ftpget</code> and scripts piped out with <code>-O-</code> at the end of the line. Both are fixed and now tested against the real command lines, masked.</li>
-      <li><b>AbuseIPDB.</b> On Nov 8, I reported the 49 IPs that got into the shell in the 24 hours before, and on Nov 10, 103 more that got in after that.</li>
+      <li><b>AbuseIPDB.</b> On Nov 8, I reported the 49 IPs that got into the shell in the 24 hours before, and on Nov 10, 121 more that got in after that.</li>
     </ul>
   </section>
 
