@@ -116,7 +116,7 @@
   <section id="threat-intel">
     <div class="sec-head"><span class="idx">03</span><h2>Were these IPs already known?</h2></div>
     <ul class="prose">
-      <li><b>Almost all were already reported.</b> On Nov 7, I checked all 478 IPs that visited from Nov 2 to Nov 6 against AbuseIPDB, sending only the addresses. 472 had reports from the past year, at least 417 of them from before the honeypot first saw them, and the other 6 had none in the past year.</li>
+      <li><b>Almost all were already reported.</b> On Nov 7, I checked all 478 IPs that visited from Nov 2 to Nov 6 against AbuseIPDB, sending only the addresses (Nov 2 was the day before the shell, when the honeypot only showed a login prompt). 472 had reports from the past year, at least 417 of them from before the honeypot first saw them, and the other 6 had none in the past year.</li>
       <li><b>New attackers were reported fast.</b> 3 of the 7 IPs that tried a download had no reports until after they reached the honeypot. Within three days of their first report, they had 1,055 to 5,343 each.</li>
     </ul>
   </section>
@@ -163,6 +163,35 @@
       </picture>
       <figcaption>Visits per hour, UTC. The vertical line is the change, when the telnet opening and fake shell went live.</figcaption>
     </figure>
+  </section>
+
+  <section id="update">
+    <div class="sec-head"><span class="idx">06</span><h2>Update: Nov 7–10</h2></div>
+    <div class="prose">
+      <p><b>Added Nov 10, 2026.</b> From right after the last visit above, Nov 6 15:34 UTC, to Nov 10 19:45 UTC (100 hours), on the same server with the same settings. Everything above still covers Nov 3–6 only.</p>
+    </div>
+    <div class="table-scroll steps-table two-col">
+      <table>
+        <thead><tr><th>Headline</th><th>Nov 7–10</th></tr></thead>
+        <tbody>
+          <tr><td>Connections</td><td>3,077 from 447 IP addresses</td></tr>
+          <tr><td>Logins into the fake shell</td><td>358 from 188 IP addresses</td></tr>
+          <tr><td>Commands</td><td>2,012, of which 107 were different</td></tr>
+          <tr><td>Download attempts</td><td>10 sessions from 6 IPs, naming 11 different addresses, 10 of them new</td></tr>
+          <tr><td>Campaigns never seen before</td><td>13 of 24, in 60 sessions from 14 IPs</td></tr>
+          <tr><td>Outbound connections made by the honeypot</td><td><b>0</b></td></tr>
+          <tr><td>Reported to AbuseIPDB</td><td>49 IPs on Nov 8 and 103 on Nov 10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">A campaign is every shell session that sent exactly the same commands, with the probe's random tag removed.</p>
+    <ul class="prose">
+      <li><b>New campaigns.</b> One IP never seen before sent NUL-ended menu words (<code>enable\0</code>, <code>system\0</code>, <code>shell\0</code>) in 35 sessions on Nov 10, each held for the full 30 seconds. 12 sessions from 5 IPs ran the BusyBox check with a random eight-character word where earlier bots used a name such as <code>SORA</code>, and a new dropper, <code>telnet2.sh</code>, came from 3 IPs.</li>
+      <li><b>New download URLs, masked:</b> <code>hxxp://176[.]65[.]x[.]x/telnet2.sh</code>, <code>hxxp://160[.]187[.]x[.]x/all.sh</code>, <code>hxxp://37[.]221[.]x[.]x/all.sh</code>, <code>hxxp://102[.]220[.]x[.]x/curl.sh</code> and <code>hxxp://102[.]220[.]x[.]x/wget.sh</code>. With one server named only for TFTP or FTP, that's 10 new addresses on 5 new servers. 6 of the 10 download sessions also tried FTP (<code>busybox ftpget</code>), which no session did from Nov 3 to Nov 6.</li>
+      <li><b>Outbound: still 0.</b> The host firewall logged no blocked outbound connection and the cloud firewall's egress log had no hits, though bots sent 66 download addresses to the shell.</li>
+      <li><b>Detection fixes.</b> The report's BusyBox rule missed a random word that starts with a lower-case letter, and its download rule missed <code>ftpget</code> and scripts piped out with <code>-O-</code> at the end of the line. Both are fixed and now tested against the real command lines, masked.</li>
+      <li><b>AbuseIPDB.</b> On Nov 8, I reported the 49 IPs that got into the shell in the 24 hours before, and on Nov 10, 103 more that got in after that.</li>
+    </ul>
   </section>
 
   <section id="more">
