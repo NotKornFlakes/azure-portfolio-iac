@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <title>Rust Telnet Honeypot · Timothy Fletcher</title>
-<meta name="description" content="A telnet honeypot in Rust that recorded what IoT botnets do after logging in: 2,450 connections, 481 logins, 13 malware download attempts and zero outbound connections.">
+<meta name="description" content="A telnet honeypot in Rust that recorded what IoT botnets do after logging in: 5,527 connections, 839 logins, 23 malware download attempts and zero outbound connections.">
 <link rel="canonical" href="https://timfletcher.tech/honeypot/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/inter-4.001-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -33,7 +33,7 @@
     <div class="back"><a href="/#projects">← All projects</a></div>
     <div class="prompt">$ cd ~/projects/rust-telnet-honeypot</div>
     <h1>Rust Telnet Honeypot</h1>
-    <p class="role"><strong>What IoT botnets do after they log in</strong> · 86 hours on Google Cloud · Nov 3–6, 2026</p>
+    <p class="role"><strong>What IoT botnets do after they log in</strong> · 186 hours on Google Cloud · Nov 3–10, 2026</p>
     <div class="tags">
       <span class="tag">Rust</span>
       <span class="tag">Google Cloud</span>
@@ -56,16 +56,16 @@
     <picture>
       <source srcset="/honeypot/1-funnel-light.png" media="(prefers-color-scheme: light)">
       <img src="/honeypot/1-funnel-dark.png" width="2000" height="840" fetchpriority="high"
-           alt="Funnel chart, Nov 3–6: 2,450 connections; 2,132 sent a login (87%); 481 got into the shell (19.6%); 414 sent a command (16.9%); 165 ran a real-shell check (6.7%); 13 reached a download (0.5%).">
+           alt="Funnel chart, Nov 3–10: 5,527 connections; 4,805 sent a login (86.9%); 839 got into the shell (15.2%); 706 sent a command (12.8%); 339 ran a real-shell check (6.1%); 23 reached a download (0.4%).">
     </picture>
-    <figcaption>Of 2,450 connections, 481 got into the fake shell and 13 reached a download. The last two steps overlap rather than nest: 4 of the 13 downloads came after a check.</figcaption>
+    <figcaption>Of 5,527 connections, 839 got into the fake shell and 23 reached a download. The last two steps overlap rather than nest: 4 of the 23 downloads came after a check.</figcaption>
   </figure>
 
   <section id="summary">
     <div class="sec-head"><span class="idx">01</span><h2>In short</h2></div>
     <ul class="prose">
-      <li><b>What I built:</b> a medium-interaction telnet honeypot in Rust, run on Google Cloud for 86 hours. 18 common factory-default logins get into a shell that's entirely fake. Every reply is fixed text compiled into the program, and nothing a visitor sends is ever run or fetched.</li>
-      <li><b>What I found:</b> 481 of 2,450 connections logged in and sent 1,772 commands, including 13 attempts to download and run malware. None of them produced an outbound connection. Most bots followed the same playbook, mapped below to MITRE ATT&amp;CK.</li>
+      <li><b>What I built:</b> a medium-interaction telnet honeypot in Rust, run on Google Cloud for 186 hours. 18 common factory-default logins get into a shell that's entirely fake. Every reply is fixed text compiled into the program, and nothing a visitor sends is ever run or fetched.</li>
+      <li><b>What I found:</b> 839 of 5,527 connections logged in and sent 3,784 commands, including 23 attempts to download and run malware. None of them produced an outbound connection. Most bots followed the same playbook, mapped below to MITRE ATT&amp;CK.</li>
       <li><b>What it shows:</b> a fixed-reply shell is safe but easy to spot. Almost every bot that checked for its own marker word left before the payload stage. Silent visitors fell from 82% to 12% after the server began opening with telnet negotiation. The IP address stayed the same, but almost none of the earlier visitors came back and the baseline is one day, so that cause isn't proven.</li>
     </ul>
   </section>
@@ -78,7 +78,7 @@
         <img src="/honeypot/4-playbook-dark.png" width="2000" height="1200" loading="lazy"
              alt="Bar chart of sessions per playbook step, in attack order, with ATT&amp;CK IDs. The same numbers are in the table below.">
       </picture>
-      <figcaption>Sessions that took each step. Most sessions took several. 165 of the 414 sessions with commands ran a check that only a real shell passes, and 161 of them stopped there.</figcaption>
+      <figcaption>Sessions that took each step. Most sessions took several. 339 of the 706 sessions with commands ran a check that only a real shell passes, and 335 of them stopped there.</figcaption>
     </figure>
     <details class="steps">
       <summary>The playbook as a table</summary>
@@ -86,18 +86,18 @@
         <table>
           <thead><tr><th>Step</th><th>MITRE ATT&amp;CK</th><th class="num">Sessions</th><th class="num">IPs</th></tr></thead>
           <tbody>
-            <tr><td>Log in with factory defaults</td><td><a href="https://attack.mitre.org/techniques/T1110/001/" target="_blank" rel="noopener">T1110.001</a>, <a href="https://attack.mitre.org/techniques/T1078/001/" target="_blank" rel="noopener">T1078.001</a></td><td class="num">481</td><td class="num">152</td></tr>
-            <tr><td>Break out of a router's limited menu</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">299</td><td class="num">92</td></tr>
-            <tr><td>Try a router CLI</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a></td><td class="num">80</td><td class="num">25</td></tr>
-            <tr><td>Inject a shell into a ping tool</td><td><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">64</td><td class="num">48</td></tr>
-            <tr><td>Look around</td><td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener">T1082</a>, <a href="https://attack.mitre.org/techniques/T1087/001/" target="_blank" rel="noopener">T1087.001</a>, <a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener">T1033</a>, <a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">116</td><td class="num">50</td></tr>
-            <tr><td>Find a writable folder, then check with a hex echo</td><td><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">80</td><td class="num">25</td></tr>
-            <tr><td>Check for a real BusyBox</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">29</td><td class="num">11</td></tr>
-            <tr><td>Check that echo works</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">9</td><td class="num">9</td></tr>
-            <tr><td>The <code>SHELL_TEST</code> check</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">47</td><td class="num">3</td></tr>
-            <tr><td>Download and run</td><td><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener">T1105</a>, <a href="https://attack.mitre.org/techniques/T1222/002/" target="_blank" rel="noopener">T1222.002</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">13</td><td class="num">7</td></tr>
-            <tr><td>Remove rival bots</td><td><a href="https://attack.mitre.org/techniques/T1489/" target="_blank" rel="noopener">T1489</a></td><td class="num">1</td><td class="num">1</td></tr>
-            <tr><td>Clean up</td><td><a href="https://attack.mitre.org/techniques/T1070/004/" target="_blank" rel="noopener">T1070.004</a></td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>Log in with factory defaults</td><td><a href="https://attack.mitre.org/techniques/T1110/001/" target="_blank" rel="noopener">T1110.001</a>, <a href="https://attack.mitre.org/techniques/T1078/001/" target="_blank" rel="noopener">T1078.001</a></td><td class="num">839</td><td class="num">330</td></tr>
+            <tr><td>Break out of a router's limited menu</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">576</td><td class="num">211</td></tr>
+            <tr><td>Try a router CLI</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a></td><td class="num">196</td><td class="num">58</td></tr>
+            <tr><td>Inject a shell into a ping tool</td><td><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">137</td><td class="num">117</td></tr>
+            <tr><td>Look around</td><td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener">T1082</a>, <a href="https://attack.mitre.org/techniques/T1087/001/" target="_blank" rel="noopener">T1087.001</a>, <a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener">T1033</a>, <a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">191</td><td class="num">117</td></tr>
+            <tr><td>Find a writable folder, then check with a hex echo</td><td><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">198</td><td class="num">60</td></tr>
+            <tr><td>Check for a real BusyBox</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">73</td><td class="num">24</td></tr>
+            <tr><td>Check that echo works</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">12</td><td class="num">12</td></tr>
+            <tr><td>The <code>SHELL_TEST</code> check</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">58</td><td class="num">3</td></tr>
+            <tr><td>Download and run</td><td><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener">T1105</a>, <a href="https://attack.mitre.org/techniques/T1222/002/" target="_blank" rel="noopener">T1222.002</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">23</td><td class="num">12</td></tr>
+            <tr><td>Remove rival bots</td><td><a href="https://attack.mitre.org/techniques/T1489/" target="_blank" rel="noopener">T1489</a></td><td class="num">2</td><td class="num">2</td></tr>
+            <tr><td>Clean up</td><td><a href="https://attack.mitre.org/techniques/T1070/004/" target="_blank" rel="noopener">T1070.004</a></td><td class="num">6</td><td class="num">5</td></tr>
           </tbody>
         </table>
       </div>
@@ -107,17 +107,18 @@
       <picture>
         <source srcset="/honeypot/6-sessions-ended-light.png" media="(prefers-color-scheme: light)">
         <img src="/honeypot/6-sessions-ended-dark.png" width="2000" height="460" loading="lazy"
-             alt="Segmented bar: of 481 shell sessions, 289 (60%) hung up and 192 (40%) hit the 30-second limit.">
+             alt="Segmented bar: of 839 shell sessions, 531 (63%) hung up and 308 (37%) hit the 30-second limit.">
       </picture>
-      <figcaption>None of the 481 sessions typed <code>exit</code>. The 192 that hit the limit held a bot for the full 30 seconds.</figcaption>
+      <figcaption>None of the 839 sessions typed <code>exit</code>. The 308 that hit the limit held a bot for the full 30 seconds.</figcaption>
     </figure>
   </section>
 
   <section id="threat-intel">
     <div class="sec-head"><span class="idx">03</span><h2>Were these IPs already known?</h2></div>
     <ul class="prose">
-      <li><b>Almost all were already reported.</b> On Nov 7, I checked all 478 IPs that visited from Nov 2 to Nov 6 against AbuseIPDB, sending only the addresses (Nov 2 was the day before the shell, when the honeypot only showed a login prompt). 472 had reports from the past year, at least 417 of them from before the honeypot first saw them, and the other 6 had none in the past year.</li>
-      <li><b>New attackers were reported fast.</b> 3 of the 7 IPs that tried a download had no reports until after they reached the honeypot. Within three days of their first report, they had 1,055 to 5,343 each.</li>
+      <li><b>Almost all were already reported.</b> On Nov 10 and Nov 11, I checked all 901 IPs that visited from Nov 2 to Nov 10 against AbuseIPDB, sending only the addresses (Nov 2 was the day before the shell, when the honeypot only showed a login prompt). Of the 330 that got into the fake shell, 328 (99%) had reports from the past year, and at least 316 (96%) had been reported before the honeypot first saw them. All 901 give the same shares: 891 (99%) had reports from the past year and at least 867 (96%) from before, and the other 10 had none in the past year. At least 48 of the 901 were research scanners such as Censys, Shadowserver and Shodan: none got into the shell, all had been reported before, and leaving them out moves none of these shares by as much as a point.</li>
+      <li><b>The download IPs had all been reported before.</b> All 12 IPs that tried a download had been reported before they arrived. For 5 of them, all 100 reports AbuseIPDB lists came after the honeypot saw them, so it took a second check, counting only the reports since a day before, to show there were older ones.</li>
+      <li><b>Most of my reports weren't the first.</b> Of the 170 IPs I reported to AbuseIPDB, someone else had reported 162 first: 158 shown by the reports AbuseIPDB lists, and 4 more by the same kind of second check. I was the first in the past year for 7. For the last one it can't be told: mine wasn't among the newest 100 reports AbuseIPDB lists, and the second check counted more reports than the first lookup had, because more came in between.</li>
     </ul>
   </section>
 
@@ -125,16 +126,19 @@
     <div class="sec-head"><span class="idx">04</span><h2>What defenders should do</h2></div>
     <ol class="prose">
       <li><b>Block inbound telnet (23 and 2323) at the edge.</b> 87% of connections here sent a login, and an open telnet port was all any of these bots needed to start.</li>
-      <li><b>Change factory-default logins before a device is deployed.</b> 18 common defaults were enough for 481 logins from 152 IPs in 86 hours.</li>
-      <li><b>Put IoT devices on their own network segment, with outbound traffic restricted to what they need.</b> Every dropper here had to fetch its payload from a raw IP address, over ports 80, 443, 8081 and 9087 or over TFTP. An outbound allow-list would have stopped every download in this data, as this honeypot's own firewalls did.</li>
+      <li><b>Change factory-default logins before a device is deployed.</b> 18 common defaults were enough for 839 logins from 330 IPs in 186 hours.</li>
+      <li><b>Put IoT devices on their own network segment, with outbound traffic restricted to what they need.</b> Every dropper here had to fetch its payload from a raw IP address, over ports 80, 443, 8081 and 9087 or over TFTP or FTP. An outbound allow-list would have stopped every download in this data, as this honeypot's own firewalls did.</li>
       <li><b>Alert on new outbound connections from IoT devices.</b> These devices talk to a small, fixed set of servers, so a connection to an unfamiliar address is worth a look, especially within minutes of an inbound login. The full report has a KQL query that does this from firewall logs.</li>
-      <li><b>Use IP reputation blocklists, but as one layer, not the defense.</b> By Nov 7, 301 of the 478 IPs (63%) scored 75 or above. On the day they arrived, fewer would have: at least 23 of those 301 had no reports until after they reached the honeypot. They include all 7 IPs behind the bots that kept coming back from one to three IPs, which score 100 now. A blocklist only knows yesterday's attackers, so it adds to steps 1 to 4 rather than replacing them.</li>
+      <li><b>Use IP reputation blocklists, but as one layer, not the defense.</b> At least 316 of the 330 IPs that got into the shell (96%) had been reported to AbuseIPDB before they reached the honeypot, so a reputation blocklist would likely have flagged most of them. A past report isn't the same as a high score on the day, though: the lookups give only each IP's score when it was checked, so what these IPs scored when they arrived can't be seen. By Nov 11, 551 of the 901 IPs (61%) scored 75 or above, and at least 2 of those, and as many as 6, had no reports until after they reached the honeypot. A blocklist only knows yesterday's attackers, so it adds to steps 1 to 4 rather than replacing them.</li>
     </ol>
+    <div class="prose">
+      <p><b>The detections were updated as the bots changed.</b> The report's BusyBox rule now looks for an upper-case letter anywhere in the applet word, so a random word that starts in lower case is caught, and its download rule now covers BusyBox's FTP client, <code>ftpget</code>, and scripts piped out with <code>-O-</code> at the end of a line. Both are tested against the real command lines, masked. One gap remains: a generically named script saved to a file isn't caught, because matching every script fetched from a bare IP would also flag internal installers.</p>
+    </div>
     <figure class="figure">
       <picture>
         <source srcset="/honeypot/5-usernames-light.png" media="(prefers-color-scheme: light)">
         <img src="/honeypot/5-usernames-dark.png" width="2000" height="920" loading="lazy"
-             alt="Bar chart of the usernames tried by the most IPs: root 151, admin 120, default 34, guest 32, support 24, telnetadmin 21, user 17, telecomadmin 16, administrator 12, hikvision 11.">
+             alt="Bar chart of the usernames tried by the most IPs: root 351, admin 261, default 84, guest 60, support 57, user 41, telnetadmin 40, super 37, telecomadmin 34, Alphanetworks 26.">
       </picture>
       <figcaption>The usernames bots tried most widely. Passwords aren't shown, and neither are names only one IP tried.</figcaption>
     </figure>
@@ -143,7 +147,7 @@
   <section id="telnet">
     <div class="sec-head"><span class="idx">05</span><h2>The telnet opening, and its caveat</h2></div>
     <div class="prose">
-      <p>Before the shell, the honeypot only showed a login prompt, and 82% of visits sent nothing at all. 241 of those silent visits came from 11 IPs with the same rhythm: connect, stay silent for about 8 seconds, hang up and try again. Real devices start telnet negotiation as soon as a client connects, so the shell release does the same. Afterwards, silent visits fell to 12%, and 81% of visits answered the negotiation.</p>
+      <p>Before the shell, the honeypot only showed a login prompt, and 82% of visits sent nothing at all. 241 of those silent visits came from 11 IPs with the same rhythm: connect, stay silent for about 8 seconds, hang up and try again. Real devices start telnet negotiation as soon as a client connects, so the shell release does the same. From Nov 3 to Nov 6, silent visits fell to 12%, and 81% of visits answered the negotiation. Through Nov 10, silent visits stayed between 8% and 14% each day.</p>
     </div>
     <figure class="figure">
       <picture>
@@ -159,39 +163,10 @@
       <picture>
         <source srcset="/honeypot/2-visits-per-hour-light.png" media="(prefers-color-scheme: light)">
         <img src="/honeypot/2-visits-per-hour-dark.png" width="2000" height="840" loading="lazy"
-             alt="Line chart of visits per hour from Nov 2 to Nov 6, with a line marking the change on Nov 3 at 01:29 UTC, when the telnet opening and fake shell went live.">
+             alt="Line chart of visits per hour from Nov 2 to Nov 10, with a line marking the change on Nov 3 at 01:29 UTC, when the telnet opening and fake shell went live.">
       </picture>
       <figcaption>Visits per hour, UTC. The vertical line is the change, when the telnet opening and fake shell went live.</figcaption>
     </figure>
-  </section>
-
-  <section id="update">
-    <div class="sec-head"><span class="idx">06</span><h2>Update: Nov 7–10</h2></div>
-    <div class="prose">
-      <p><b>Added Nov 10, 2026.</b> From right after the last visit above, Nov 6 15:34 UTC, to Nov 10 19:45 UTC (100 hours), on the same server with the same settings. Everything above still covers Nov 3–6 only.</p>
-    </div>
-    <div class="table-scroll steps-table two-col">
-      <table>
-        <thead><tr><th>Headline</th><th>Nov 7–10</th></tr></thead>
-        <tbody>
-          <tr><td>Connections</td><td>3,077 from 447 IP addresses</td></tr>
-          <tr><td>Logins into the fake shell</td><td>358 from 188 IP addresses</td></tr>
-          <tr><td>Commands</td><td>2,012, of which 107 were different</td></tr>
-          <tr><td>Download attempts</td><td>10 sessions from 6 IPs, naming 11 different addresses, 10 of them new</td></tr>
-          <tr><td>Campaigns never seen before</td><td>13 of 24, in 60 sessions from 14 IPs</td></tr>
-          <tr><td>Outbound connections made by the honeypot</td><td><b>0</b></td></tr>
-          <tr><td>Reported to AbuseIPDB</td><td>49 IPs on Nov 8 and 121 on Nov 10</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="table-note">A campaign is every shell session that sent exactly the same commands, with the probe's random tag removed.</p>
-    <ul class="prose">
-      <li><b>New campaigns.</b> One IP never seen before sent NUL-ended menu words (<code>enable\0</code>, <code>system\0</code>, <code>shell\0</code>) in 35 sessions on Nov 10, each held for the full 30 seconds. 12 sessions from 5 IPs ran the BusyBox check with a random eight-character word where earlier bots used a name such as <code>SORA</code>, and a new dropper, <code>telnet2.sh</code>, came from 3 IPs.</li>
-      <li><b>New download URLs, masked:</b> <code>hxxp://176[.]65[.]x[.]x/telnet2.sh</code>, <code>hxxp://160[.]187[.]x[.]x/all.sh</code>, <code>hxxp://37[.]221[.]x[.]x/all.sh</code>, <code>hxxp://102[.]220[.]x[.]x/curl.sh</code> and <code>hxxp://102[.]220[.]x[.]x/wget.sh</code>. With one server named only for TFTP or FTP, that's 10 new addresses on 5 new servers. 6 of the 10 download sessions also tried FTP (<code>busybox ftpget</code>), which no session did from Nov 3 to Nov 6.</li>
-      <li><b>Outbound: still 0.</b> The host firewall logged no blocked outbound connection and the cloud firewall's egress log had no hits, though bots sent 66 download addresses to the shell.</li>
-      <li><b>Detection fixes.</b> The report's BusyBox rule missed a random word that starts with a lower-case letter, and its download rule missed <code>ftpget</code> and scripts piped out with <code>-O-</code> at the end of the line. Both are fixed and now tested against the real command lines, masked.</li>
-      <li><b>AbuseIPDB.</b> On Nov 8, I reported the 49 IPs that got into the shell in the 24 hours before, and on Nov 10, 121 more that got in after that.</li>
-    </ul>
   </section>
 
   <section id="more">
