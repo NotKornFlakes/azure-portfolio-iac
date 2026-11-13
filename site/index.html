@@ -32,7 +32,7 @@
   <header class="hero">
     <div class="prompt">$ whoami <span class="cursor" aria-hidden="true"></span></div>
     <h1>Timothy Fletcher</h1>
-    <p class="role"><strong>Security enthusiast</strong> · Linux · Open source · Defense on a budget</p>
+    <p class="role"><strong>Detection engineering</strong> · Linux · Open source · Defense on a budget</p>
     <p class="summary">
       I'm learning how small companies can protect themselves from attackers without expensive
       subscriptions, using Linux and free, community-built open-source tools. My goal is simple
@@ -87,6 +87,7 @@
         <ul>
           <li>Recorded <b>5,527 connections from 790 IPs</b> in 186 hours. 839 logins sent 3,784 commands, and 23 malware download attempts made <b>zero outbound connections</b>.</li>
           <li>Mapped the post-login playbook to <b>MITRE ATT&amp;CK</b>: router-menu escapes, BusyBox checks, writable-folder probes and droppers for several CPU types.</li>
+          <li>Reported <b>170 attacking IPs</b> to AbuseIPDB. At least <b>316 of the 330</b> IPs that got into the shell (96%) had already been reported before they arrived.</li>
           <li>Each layer assumes the last one failed: fixed replies the compiler enforces, a noexec systemd sandbox, and outbound traffic denied at both the host and cloud firewalls.</li>
         </ul>
         <div class="stack"><span>Rust</span><span>Google Cloud</span><span>Terraform</span><span>nftables</span><span>MITRE ATT&amp;CK</span><span>Plotly</span></div>
@@ -197,19 +198,26 @@
     <div class="sec-head"><span class="idx">03</span><h2>Skills</h2></div>
     <div class="skills">
       <div class="skill-group">
+        <h3>// Open-Source Detection</h3>
+        <div class="chips">
+          <span>Sigma</span><span>Rust</span><span>Python</span><span>Linux (Fedora, Ubuntu)</span><span>nftables</span>
+          <span>Google Cloud</span><span>Terraform</span><span>AbuseIPDB</span><span>MITRE ATT&amp;CK</span>
+        </div>
+      </div>
+      <div class="skill-group">
         <h3>// SIEM &amp; Security Ops</h3>
         <div class="chips">
           <span>Microsoft Sentinel</span><span>KQL</span><span>Log Analytics</span><span>Logic Apps (SOAR)</span>
-          <span>MITRE ATT&amp;CK</span><span>IOC triage</span><span>Threat intel</span><span>Honeypots</span>
+          <span>IOC triage</span><span>Threat intel</span><span>Honeypots</span>
           <span>Detection tuning</span><span>Incident write-ups</span>
         </div>
       </div>
       <div class="skill-group">
         <h3>// Cloud &amp; Systems</h3>
         <div class="chips">
-          <span>Active Directory</span><span>Microsoft 365</span><span>Windows</span><span>Linux (Ubuntu)</span>
+          <span>Active Directory</span><span>Microsoft 365</span><span>Windows</span>
           <span>Azure VMs</span><span>NSG rules</span><span>RBAC</span><span>Managed identity</span>
-          <span>Azure Monitor Agent</span><span>Terraform</span><span>Cloudflare</span>
+          <span>Azure Monitor Agent</span><span>Cloudflare</span>
           <span>Email authentication (SPF, DKIM, DMARC)</span>
         </div>
       </div>
@@ -223,7 +231,7 @@
       <div class="skill-group">
         <h3>// Scripting &amp; Reporting</h3>
         <div class="chips">
-          <span>Python</span><span>pandas</span><span>Plotly</span><span>SQL</span><span>REST APIs</span>
+          <span>pandas</span><span>Plotly</span><span>SQL</span><span>REST APIs</span>
           <span>Sentinel workbooks</span><span>D3</span><span>Tableau</span><span>Excel</span><span>Git</span>
         </div>
       </div>
