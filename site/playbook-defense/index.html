@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <title>Playbook Defense · Timothy Fletcher</title>
-<meta name="description" content="Turning a honeypot's findings into defense: 16 Sigma rules mapped to every step of the IoT botnet playbook, a GCP firewall allowlist in Terraform, and an internal NAS decoy where any connection is an alert.">
+<meta name="description" content="Turning a honeypot's findings into defense: 17 Sigma rules mapped to every step of the IoT botnet playbook, a GCP firewall allowlist in Terraform, and an internal NAS decoy where any connection is an alert.">
 <link rel="canonical" href="https://timfletcher.tech/playbook-defense/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/inter-4.001-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -53,7 +53,7 @@
   </header>
 
   <div class="metrics">
-    <div class="metric"><div class="num">16</div><div class="lbl">Sigma rules, checked against ATT&amp;CK in CI</div></div>
+    <div class="metric"><div class="num">17</div><div class="lbl">Sigma rules, checked against ATT&amp;CK in CI</div></div>
     <div class="metric"><div class="num">12/12</div><div class="lbl">playbook steps with at least one alert</div></div>
     <div class="metric"><div class="num">1</div><div class="lbl">file feeds both the firewall and the alerts</div></div>
     <div class="metric"><div class="num">12</div><div class="lbl">NAS ports on the decoy's tripwire</div></div>
@@ -62,8 +62,8 @@
   <section id="summary">
     <div class="sec-head"><span class="idx">01</span><h2>In short</h2></div>
     <ul class="prose">
-      <li><b>Where it starts:</b> the <a href="/honeypot/">Rust telnet honeypot</a> recorded 481 bot logins and the steps they took afterwards, from default passwords to malware downloads. Its report ends with what defenders should do. This project does it.</li>
-      <li><b>What I built:</b> 16 Sigma alert rules, one or more for every step of that playbook; Google Cloud firewall rules in Terraform that only let approved addresses reach admin ports and only let IoT devices reach the servers they need; and an internal decoy NAS, running the honeypot's own fake shell, that no real person or system ever uses.</li>
+      <li><b>Where it starts:</b> the <a href="/honeypot/">Rust telnet honeypot</a> recorded 839 bot logins and the steps they took afterwards, from default passwords to malware downloads. Its report ends with what defenders should do. This project does it.</li>
+      <li><b>What I built:</b> 17 Sigma alert rules, one or more for every step of that playbook; Google Cloud firewall rules in Terraform that only let approved addresses reach admin ports and only let IoT devices reach the servers they need; and an internal decoy NAS, running the honeypot's own fake shell, that no real person or system ever uses.</li>
       <li><b>Why it holds together:</b> a single file, <code>allowlist.yaml</code>, lists who is allowed in, where IoT devices may go and where the decoy lives. Terraform builds the firewall from it, and a script writes the same addresses into the alert rules, so the firewall and the alerts can't drift apart.</li>
     </ul>
   </section>
@@ -133,7 +133,7 @@
           <rect class="box" x="300" y="384" width="190" height="60" rx="10"/>
           <text x="395" y="419" text-anchor="middle">VPC firewall logs</text>
           <rect class="box" x="520" y="384" width="180" height="60" rx="10"/>
-          <text x="610" y="419" text-anchor="middle">16 Sigma rules</text>
+          <text x="610" y="419" text-anchor="middle">17 Sigma rules</text>
           <rect class="box" x="730" y="384" width="182" height="60" rx="10"/>
           <text x="821" y="419" text-anchor="middle">SIEM alerts</text>
 
@@ -176,6 +176,7 @@
           <tr><td>Download and run</td><td><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener">T1105</a>, <a href="https://attack.mitre.org/techniques/T1222/002/" target="_blank" rel="noopener">T1222.002</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td>Download from a raw IP; IoT device calling out, critical on dropper ports</td><td>Processes, firewall</td><td><span class="lvl crit">critical</span></td></tr>
           <tr><td>Remove rival bots</td><td><a href="https://attack.mitre.org/techniques/T1489/" target="_blank" rel="noopener">T1489</a></td><td><code>kill -9</code> aimed at other malware</td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
           <tr><td>Clean up</td><td><a href="https://attack.mitre.org/techniques/T1070/004/" target="_blank" rel="noopener">T1070.004</a></td><td>Dropped file or shell history deleted</td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
+          <tr><td>Write a payload with hex echoes, instead of downloading</td><td><a href="https://attack.mitre.org/techniques/T1140/" target="_blank" rel="noopener">T1140</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td>Long runs of hex escapes in <code>echo -ne</code> or <code>printf</code></td><td>Processes</td><td><span class="lvl">medium</span></td></tr>
           <tr class="extra"><td>The whole playbook</td><td>—</td><td>Telnet from outside, then the same device calls out within 10 minutes</td><td>Firewall</td><td><span class="lvl crit">critical</span></td></tr>
           <tr class="extra"><td>The trap</td><td>—</td><td>Any connection to the decoy; a login attempt on it; the decoy trying to connect out</td><td>Firewall</td><td><span class="lvl crit">critical</span></td></tr>
         </tbody>
@@ -199,7 +200,7 @@
   <section id="tested">
     <div class="sec-head"><span class="idx">05</span><h2>What's tested, and what isn't</h2></div>
     <ul class="prose">
-      <li><b>Tested on every push.</b> GitHub Actions checks every rule, including its ATT&amp;CK tags, and fails the build on any issue. It then converts all 16 rules to Splunk searches and validates the Terraform. While building it, that check caught two real problems: tags that a newer ATT&amp;CK release had renamed, and a correlation rule that was silently swallowing two of the rules it was built from.</li>
+      <li><b>Tested on every push.</b> GitHub Actions checks every rule, including its ATT&amp;CK tags, and fails the build on any issue. It then converts all 17 rules to Splunk searches and validates the Terraform. While building it, that check caught two real problems: tags that a newer ATT&amp;CK release had renamed, and a correlation rule that was silently swallowing two of the rules it was built from.</li>
       <li><b>Not tested yet.</b> It hasn't been deployed to a real company network. The rules have been converted, not run against live logs, and the Terraform has been validated, not applied. The repo ships with placeholder addresses, and its README lists the checks to run once the real ones are filled in.</li>
     </ul>
   </section>
