@@ -263,9 +263,6 @@ header.hero.project { padding: 48px 0 32px; }
 .steps-table th { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .steps-table code { font-family: var(--mono); font-size: .9em; }
 .steps-table tr.extra td { background: var(--bg-2); }
-/* A two-column table fits a phone screen, so it doesn't need the wide tables' minimum width. */
-.steps-table.two-col { max-width: 720px; }
-.steps-table.two-col table { min-width: 0; }
 .lvl { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
 .lvl.high { color: var(--accent-2); }
 .lvl.crit { color: var(--warn); font-weight: 600; }

@@ -71,7 +71,7 @@
 
   <div class="metrics" aria-label="Project highlights">
     <div class="metric"><div class="num">1.24M</div><div class="lbl">attack attempts captured by my honeypots in 37 hours</div></div>
-    <div class="metric"><div class="num">0</div><div class="lbl">outbound connections from 481 bot logins on my Rust honeypot</div></div>
+    <div class="metric"><div class="num">0</div><div class="lbl">outbound connections from 839 bot logins on my Rust honeypot</div></div>
     <div class="metric"><div class="num">16</div><div class="lbl">open-source Sigma rules, one or more for every playbook step</div></div>
     <div class="metric"><div class="num">91%</div><div class="lbl">alert noise cut (65 alerts → 6 incidents)</div></div>
   </div>
@@ -85,7 +85,7 @@
         <h3>Rust Telnet Honeypot: What IoT Botnets Do After Login</h3>
         <p>A telnet honeypot in Rust on Google Cloud, with a fake shell that records what bots do after logging in and never runs anything they send.</p>
         <ul>
-          <li>Recorded <b>2,450 connections from 364 IPs</b> in 86 hours. 481 logins sent 1,772 commands, and 13 malware download attempts made <b>zero outbound connections</b>.</li>
+          <li>Recorded <b>5,527 connections from 790 IPs</b> in 186 hours. 839 logins sent 3,784 commands, and 23 malware download attempts made <b>zero outbound connections</b>.</li>
           <li>Mapped the post-login playbook to <b>MITRE ATT&amp;CK</b>: router-menu escapes, BusyBox checks, writable-folder probes and droppers for several CPU types.</li>
           <li>Each layer assumes the last one failed: fixed replies the compiler enforces, a noexec systemd sandbox, and outbound traffic denied at both the host and cloud firewalls.</li>
         </ul>
