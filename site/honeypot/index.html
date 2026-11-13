@@ -56,9 +56,9 @@
     <picture>
       <source srcset="/honeypot/1-funnel-light.png" media="(prefers-color-scheme: light)">
       <img src="/honeypot/1-funnel-dark.png" width="2000" height="840" fetchpriority="high"
-           alt="Funnel chart, Nov 3–10: 5,527 connections; 4,805 sent a login (86.9%); 839 got into the shell (15.2%); 706 sent a command (12.8%); 339 ran a real-shell check (6.1%); 23 reached a download (0.4%).">
+           alt="Funnel chart, Nov 3–10: 5,527 connections; 4,805 sent a login (86.9%); 839 got into the shell (15.2%); 706 sent a command (12.8%); 348 ran a real-shell check (6.3%); 23 reached a download (0.4%).">
     </picture>
-    <figcaption>Of 5,527 connections, 839 got into the fake shell and 23 reached a download. The last two steps overlap rather than nest: 4 of the 23 downloads came after a check.</figcaption>
+    <figcaption>Of 5,527 connections, 839 got into the fake shell and 23 reached a download. The last two steps overlap rather than nest: 7 of the 23 downloads came after a check.</figcaption>
   </figure>
 
   <section id="summary">
@@ -78,7 +78,7 @@
         <img src="/honeypot/4-playbook-dark.png" width="2000" height="1200" loading="lazy"
              alt="Bar chart of sessions per playbook step, in attack order, with ATT&amp;CK IDs. The same numbers are in the table below.">
       </picture>
-      <figcaption>Sessions that took each step. Most sessions took several. 339 of the 706 sessions with commands ran a check that only a real shell passes, and 335 of them stopped there.</figcaption>
+      <figcaption>Sessions that took each step. Most sessions took several. 348 of the 706 sessions with commands ran a check that only a real shell passes, and 341 of them stopped there.</figcaption>
     </figure>
     <details class="steps">
       <summary>The playbook as a table</summary>
@@ -90,9 +90,9 @@
             <tr><td>Break out of a router's limited menu</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">576</td><td class="num">211</td></tr>
             <tr><td>Try a router CLI</td><td><a href="https://attack.mitre.org/techniques/T1059/008/" target="_blank" rel="noopener">T1059.008</a></td><td class="num">196</td><td class="num">58</td></tr>
             <tr><td>Inject a shell into a ping tool</td><td><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">137</td><td class="num">117</td></tr>
-            <tr><td>Look around</td><td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener">T1082</a>, <a href="https://attack.mitre.org/techniques/T1087/001/" target="_blank" rel="noopener">T1087.001</a>, <a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener">T1033</a>, <a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">191</td><td class="num">117</td></tr>
+            <tr><td>Look around</td><td><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener">T1082</a>, <a href="https://attack.mitre.org/techniques/T1087/001/" target="_blank" rel="noopener">T1087.001</a>, <a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener">T1033</a>, <a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">192</td><td class="num">118</td></tr>
             <tr><td>Find a writable folder, then check with a hex echo</td><td><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener">T1083</a></td><td class="num">198</td><td class="num">60</td></tr>
-            <tr><td>Check for a real BusyBox</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">73</td><td class="num">24</td></tr>
+            <tr><td>Check for a real BusyBox</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">82</td><td class="num">28</td></tr>
             <tr><td>Check that echo works</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">12</td><td class="num">12</td></tr>
             <tr><td>The <code>SHELL_TEST</code> check</td><td><a href="https://attack.mitre.org/techniques/T1497/001/" target="_blank" rel="noopener">T1497.001</a></td><td class="num">58</td><td class="num">3</td></tr>
             <tr><td>Download and run</td><td><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener">T1105</a>, <a href="https://attack.mitre.org/techniques/T1222/002/" target="_blank" rel="noopener">T1222.002</a>, <a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener">T1059.004</a></td><td class="num">23</td><td class="num">12</td></tr>
